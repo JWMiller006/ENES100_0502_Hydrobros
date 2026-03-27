@@ -7,7 +7,7 @@ Motor::Motor(){
 }
 
 /// Setup motor of given type 
-Motor::Motor(MotorType TypeOfMotor, MotorPos Pos, const uint8_t EnablePin, const uint8_t DirPin1, const uint8_t DirPin2){
+Motor::Motor(const MotorType TypeOfMotor, MotorPos Pos, const uint8_t EnablePin, const uint8_t DirPin1, const uint8_t DirPin2){
   // set the type of the pin and store the pin numbers 
   pinMode(EnablePin, OUTPUT); 
   mEnablePin = EnablePin;
@@ -25,7 +25,7 @@ Motor::Motor(MotorType TypeOfMotor, MotorPos Pos, const uint8_t EnablePin, const
 }
 
 /// Run specified motor at specified speed
-void Motor::SetSpeed(float Speed){
+void Motor::SetSpeed(const float Speed){
   // TODO: Add actual pin logic to set the speed (aka enable and set the speed of the motors)
   if (MotorKind == DC_Motor) {
     if (Speed > 0) { // aka go forward
@@ -36,7 +36,7 @@ void Motor::SetSpeed(float Speed){
       digitalWrite(mOutTwoPin, LOW); 
     }
 
-    uint8_t NormSpeed = FloatToShort(Speed);
+    const uint8_t NormSpeed = FloatToShort(Speed);
     digitalWrite(mEnablePin, NormSpeed); 
   }
   
@@ -49,12 +49,12 @@ Motor::~Motor(){
 }
 
 /// Activate motor pin
-void Motor::EnableMotor(bool Enable = true){
+void Motor::EnableMotor(bool Enable){
   FreeWheels(false); 
 }
 
 /// Allow the motor to move freely
-void Motor::FreeWheels(bool Free = true){
+void Motor::FreeWheels(bool Free){
   if (bInitialized && MotorKind == DC_Motor){
     if (Free) {
       digitalWrite(mEnablePin, LOW);

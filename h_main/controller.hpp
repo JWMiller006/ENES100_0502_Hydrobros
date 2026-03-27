@@ -1,9 +1,14 @@
 #pragma once
 #include "motor_ctl.hpp"
+#include "us_ctl.hpp"
 
 /// Primary Mission-Control
 class PMC {
   public: 
+    /*********************************************************/
+    /*                Initialization Section                 */
+    /*********************************************************/
+    
     /// Defualt contructor
     PMC(); 
 
@@ -15,6 +20,10 @@ class PMC {
 
     /// Runs through the final code (from start to finish)
     void RunMission(); 
+
+    /*********************************************************/
+    /*                 Motor Control Section                 */
+    /*********************************************************/
 
     /// Stop wheel movement of the OTV (keeps it locked)
     void Stop(); 
@@ -34,9 +43,19 @@ class PMC {
     /// Set the motors to drive on the given axis (including strafing)
     void Drive(float Speed, unsigned int Axis = Forward);
 
+    /*********************************************************/
+    /*                Sensor Control Section                 */
+    /*********************************************************/
+
+    /// Get the distance reading from the given direction
+    float GetUSReading(unsigned int Direction); 
+
   protected: 
     /// Motor list
     Motor FR{}, FL{}, RR{}, RL{}; 
+
+    /// Ultrasonic sensors
+    UltraSonicSensor ForwardUS{}, RightUS{}, LeftUS{}; 
 
     /// Helper function that turns the OTV around its center
     void TurnAboutCenter(float Theta);
@@ -51,3 +70,24 @@ class PMC {
     /// The or-ed together bits that specify the arena setup
     unsigned int mArragement = 0; 
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

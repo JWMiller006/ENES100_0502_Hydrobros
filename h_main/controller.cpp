@@ -5,6 +5,7 @@
 #include "motor_ctl.hpp"
 #include "helpers.hpp"
 #include "types.hpp"
+#include "us_ctl.hpp"
 
 /// Defualt contructor
 PMC::PMC(){
@@ -30,6 +31,10 @@ void PMC::Init(const char* Name, const int MissionType, const int MarkerID, cons
   RR = Motor(DC_Motor, MotorPos::RearRight, REAR_RIGHT_MOTOR_ENABLE, REAR_RIGHT_MOTOR_DRIVER_1, REAR_RIGHT_MOTOR_DRIVER_2); 
   RL = Motor(DC_Motor, MotorPos::RearLeft, REAR_LEFT_MOTOR_ENABLE, REAR_LEFT_MOTOR_DRIVER_1, REAR_LEFT_MOTOR_DRIVER_2);
 
+  // Setup US Sensors
+  ForwardUS = UltraSonicSensor(FORWARD_US_TRIGGER, FORWARD_US_ECHO); 
+  RightUS = UltraSonicSensor(RIGHT_US_TRIGGER, RIGHT_US_ECHO); 
+  LeftUS = UltraSonicSensor(LEFT_US_TRIGGER, LEFT_US_ECHO); 
 
   bInitialized = true; 
 }
@@ -81,7 +86,9 @@ void PMC::SetMotorSpeed(const unsigned int Motors, const float Speed){
 }
 
 void PMC::GoToPosition(const Point& p){
-
+  // TODO: Add code to traverse to a position (probably best in a straight line)
+  //       Note that it would be best to check how far off the points are and if 
+  //       they are too far off, stop and adjust
 }
 
 /// Get the direction that we need to turn in order to get to the specified theta
@@ -95,6 +102,8 @@ int GetDirTheta(const float target_theta, const float range = 0.05){
     } else {
         dir = 0; 
     }
+
+    
     
     return dir; 
 }
@@ -196,23 +205,41 @@ void PMC::TurnAboutCorner(const float Theta, unsigned int Axis){
 void PMC::Drive(float Speed, const unsigned int Axis){
   unsigned int forward_motors = 0, reverse_motors = 0;
 
-  if (Axis & Forward){
+  if (Axis & (Forward | Right)){
+    forward_motors |= FrontLeft | RearRight; 
+  } else if (Forward | Left){
+    forward_motors |= FrontRight | RearLeft; 
+  } else if (Backward | Right){
+    reverse_motors |= FrontRight | RearLeft;
+  } else if (Backward | Left){
+    reverse_motors |= FrontLeft | RearRight; 
+  }else if (Axis & Forward){
     forward_motors |= FrontRight | FrontLeft | RearRight | RearLeft; 
   } else if (Axis & Backward){
     reverse_motors |= FrontRight | FrontLeft | RearRight | RearLeft;
   } else if (Axis & Right){
-    forward_motors |= FrontRight | RearLeft; 
-    reverse_motors |= FrontLeft | RearRight; 
-  } else if (Axis & Left){
-    forward_motors |= FrontLeft | RearRight; 
     reverse_motors |= FrontRight | RearLeft; 
+    forward_motors |= FrontLeft | RearRight; 
+  } else if (Axis & Left){
+    reverse_motors |= FrontLeft | RearRight; 
+    forward_motors |= FrontRight | RearLeft; 
   }
 
   SetMotorSpeed(forward_motors, Speed);
   SetMotorSpeed(reverse_motors, -1.0 * Speed);
 }
 
-
+float PMC::GetUSReading(const unsigned int Direction){
+  if (Direction & Forward){
+    return ForwardUS.GetDistance();
+  } else if (Direction & Right){
+    return RightUS.GetDistance();
+  } else if (Direction & Left){
+    return LeftUS.GetDistance(); 
+  } else {
+    return -1.0f; 
+  }
+}
 
 
 
