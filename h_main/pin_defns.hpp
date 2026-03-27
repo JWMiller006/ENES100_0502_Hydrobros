@@ -1,0 +1,34 @@
+#pragma once
+#define ROOM_NUMBER                     1116
+#define TAG_NUMBER                        49
+#define TEAM_TYPE                          6 // From Enes100.h defns for hydrogen
+
+#define FORWARD_RIGHT_MOTOR_ENABLE         2
+#define FORWARD_RIGHT_MOTOR_DRIVER_1    	 6
+#define FORWARD_RIGHT_MOTOR_DRIVER_2		   7
+#define FORWARD_LEFT_MOTOR_ENABLE	         3
+#define FORWARD_LEFT_MOTOR_DRIVER_1		     8
+#define FORWARD_LEFT_MOTOR_DRIVER_2		     9
+#define REAR_RIGHT_MOTOR_ENABLE	           4
+#define REAR_RIGHT_MOTOR_DRIVER_1		      10
+#define REAR_RIGHT_MOTOR_DRIVER_2	 	      11
+#define REAR_LEFT_MOTOR_ENABLE	           5
+#define REAR_LEFT_MOTOR_DRIVER_1		      12
+#define REAR_LEFT_MOTOR_DRIVER_2		      13
+#define FORWARD_US_TRIGGER		            15
+#define FORWARD_US_ECHO	  	              14
+#define RIGHT_US_TRIGGER		              17
+#define RIGHT_US_ECHO		                  16
+#define LEFT_US_TRIGGER		                19
+#define LEFT_US_ECHO		                  18
+#define LEDRGB_PIN_DIN			              20
+#define WiFi_TX			                      50
+#define WiFi_RX			                      51
+#define STEPPER_STEP		                  23
+#define STEPPER_DIR		                    22
+#define SERVO_PIN                         24
+#define CS_S1			                        29
+#define CS_S0			                        28
+#define CS_S3			                        31
+#define CS_S2			                        30
+#define CS_OUT			                      27
