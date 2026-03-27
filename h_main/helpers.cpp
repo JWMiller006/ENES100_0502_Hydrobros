@@ -20,7 +20,7 @@ uint8_t IntToShort(int In){
 
 uint8_t FloatToShort(float In){
   if (In > 0)
-    return (uint8_t)(In * 255.0)
+    return (uint8_t)(In * 255.0);
   else 
-    return (uint8_t)(In * -1.0 * 255.0)
+    return (uint8_t)(In * -1.0 * 255.0);
 }

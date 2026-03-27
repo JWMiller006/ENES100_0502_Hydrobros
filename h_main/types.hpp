@@ -1,5 +1,7 @@
 #pragma once
 
+#define PI 3.14159
+
 enum MotorType : unsigned int { 
   M_None          = 0, 
   DC_Motor      = 1, 
@@ -21,6 +23,8 @@ enum MovementDir : unsigned int {
   Right         = 1 << 1, 
   Left          = 1 << 2, 
   Backward      = 1 << 3, 
+  Center        = 1 << 5,
+  Turn          = 1 << 6,
   Strafe        = 1 << 7,
 };
 

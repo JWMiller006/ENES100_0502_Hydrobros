@@ -8,7 +8,7 @@ void Stop(){
 }
 
 void Drive(int speed, float direction){
-    TurnTo(direction); 
+    // TurnTo(direction); 
     SetLRMotors(speed, speed); 
 }
 
@@ -17,52 +17,13 @@ void SetLRMotors(int left, int right){
     // Tank.setRightMotorPWM(right); 
 }
 
-int GetDirTheta(float target_theta){
-    int dir; 
-    // float theta = Enes100.getTheta();
-    float theta = 0.0; 
-    if (target_theta - theta > 0.05){
-        dir = 1; 
-    } else if (target_theta - theta < -0.05) {
-        dir = -1; 
-    } else {
-        dir = 0; 
-    }
-    
-    return dir; 
-}
-
-void TurnTo(float direction){
-    // float theta = Enes100.getTheta();  
-    float theta = 0.0; 
-    while (direction > PI){
-        direction -= PI; 
-    }
-    
-    while (direction < -1 * PI){
-        direction += PI; 
-    }
-    
-    int dir = GetDirTheta(direction); 
-    
-    const int turn_speed = 50; 
-    
-    while (dir != 0)
-    {
-        SetLRMotors(dir * -1 * turn_speed, dir * turn_speed); 
-        dir = GetDirTheta(direction); 
-    }
-    
-    SetLRMotors(0, 0); 
-}
-
 void TurnRelative(float rel_direction){
     // float target = rel_direction + Enes100.getTheta();
     float target = 0.0;
     while (target > PI){
         target-=PI;
     }
-    TurnTo(target); 
+    // TurnTo(target); 
 }
 
 void WaitUntilSee(float distance){

@@ -3,6 +3,8 @@
 #define TAG_NUMBER                        49
 #define TEAM_TYPE                          6 // From Enes100.h defns for hydrogen
 
+#define TURN_SPEED                       0.5
+
 #define FORWARD_RIGHT_MOTOR_ENABLE         2
 #define FORWARD_RIGHT_MOTOR_DRIVER_1    	 6
 #define FORWARD_RIGHT_MOTOR_DRIVER_2		   7

@@ -16,15 +16,33 @@ class PMC {
     /// Runs through the final code (from start to finish)
     void RunMission(); 
 
+    /// Stop wheel movement of the OTV (keeps it locked)
     void Stop(); 
 
+    /// Releases the control of the wheels to move freely (use at the end of a run to prevent damage)
+    void ReleaseWheels(bool free = true, unsigned int Motors = FrontRight | FrontLeft | RearRight | RearLeft);
+
+    /// Set the motor speed of the given motor
     void SetMotorSpeed(unsigned int Motors, float Speed); 
 
-    void GoToPosition(Point p); 
+    /// Goes to a specific point on a 2D plane (in the arena)
+    void GoToPosition(const Point& p); 
+
+    /// Turn to a specific theta (in radians) on the given axis
+    void TurnTo(float Theta, unsigned int Axis = Center | Turn);
+
+    /// Set the motors to drive on the given axis (including strafing)
+    void Drive(float Speed, unsigned int Axis = Forward);
 
   protected: 
     /// Motor list
     Motor FR{}, FL{}, RR{}, RL{}; 
+
+    /// Helper function that turns the OTV around its center
+    void TurnAboutCenter(float Theta);
+
+    /// Helper function that turns the OTV about some other axis (or together different directions to make an axis)
+    void TurnAboutCorner(float Theta, unsigned int Axis); 
 
   private: 
     /// Define if this is initialized and ready to run yet
