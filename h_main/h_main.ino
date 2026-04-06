@@ -16,15 +16,25 @@ void WaitUntilSee(float distance){
     }
 }
 
-
+PMC controller;
 
 void setup() {
-    PMC controller("Hydrobros", TEAM_TYPE, TAG_NUMBER, ROOM_NUMBER, WiFi_TX, WiFi_RX);
+    controller = PMC("Hydrobros", TEAM_TYPE, TAG_NUMBER, ROOM_NUMBER, WiFi_TX, WiFi_RX);
 
-    while (RUNNING)
-    {
-        controller.Drive(1, Forward);
-    }
+    controller.Drive(0.5f, Right);
+    delay(1000);
+    controller.Drive(0.5f, Left);
+    delay(1000);
+    controller.Drive(0.5f, Forward | Right);
+    delay(1000);
+    controller.Drive(0.5f, Forward | Left);
+    delay(1000);
+    controller.Drive(0.5f, Forward | Right);
+    delay(1000);
+    controller.Drive(0.5f, Backward | Left);
+    delay(1000);
+    controller.Drive(0.5f, Backward | Left);
+
     // while (true)
     // {
         // Serial.print("Theta: ");

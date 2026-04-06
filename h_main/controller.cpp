@@ -212,35 +212,24 @@ void PMC::TurnAboutCorner(const float Theta, unsigned int Axis){
 void PMC::Drive(float Speed, const unsigned int Axis){
   unsigned int forward_motors = 0, reverse_motors = 0;
 
-  Serial.print("Driving Motors: ");
-  Serial.println(Speed); 
-
-  if (Axis & (Forward | Right) == (Forward | Right)){
-    forward_motors |= FrontLeft | RearRight | FrontRight | RearLeft; 
-    Serial.println("1");
-  } else if (Axis & (Forward | Left) == (Forward | Left)){
-    forward_motors |= FrontRight | RearLeft; 
-    Serial.println("2");
-  } else if (Axis & (Backward | Right) == (Backward | Right)){
+  if ((Axis & (Forward | Right)) == (Forward | Right)){
+    forward_motors |= FrontLeft | RearRight | FrontRight | RearLeft;
+  } else if ((Axis & (Forward | Left)) == (Forward | Left)){
+    forward_motors |= FrontRight | RearLeft;
+  } else if ((Axis & (Backward | Right)) == (Backward | Right)){
     reverse_motors |= FrontRight | RearLeft;
-    Serial.println("3");
-  } else if (Backward | Left){
-    reverse_motors |= FrontLeft | RearRight; 
-    Serial.println("4");
-  }else if (Axis & Forward == Forward){
-    forward_motors |= FrontRight | FrontLeft | RearRight | RearLeft; 
-    Serial.println("5");
+  } else if ((Axis & (Backward | Left)) == (Backward | Left)){
+    reverse_motors |= FrontLeft | RearRight;
+  }else if (Axis & Forward){
+    forward_motors |= FrontRight | FrontLeft | RearRight | RearLeft;
   } else if (Axis & Backward){
     reverse_motors |= FrontRight | FrontLeft | RearRight | RearLeft;
-    Serial.println("6");
   } else if (Axis & Right){
     reverse_motors |= FrontRight | RearLeft; 
-    forward_motors |= FrontLeft | RearRight; 
-    Serial.println("7");
+    forward_motors |= FrontLeft | RearRight;
   } else if (Axis & Left){
     reverse_motors |= FrontLeft | RearRight; 
-    forward_motors |= FrontRight | RearLeft; 
-    Serial.println("8");
+    forward_motors |= FrontRight | RearLeft;
   }
 
   SetMotorSpeed(forward_motors, Speed);
