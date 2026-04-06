@@ -22,14 +22,14 @@ class Motor {
     void FreeWheels(bool Free = true); 
 
   private: 
-    /// If this current instance is initalized or not yet
+    /// If this current instance is initialized or not yet
     bool bInitialized = false; 
 
     /// Whether the motor is enabled or not at this moment
     bool bEnabled = false; 
 
     /// The type of motor this class represents
-    MotorType MotorKind = 0; 
+    MotorType MotorKind = M_None;
 
     /// Out Enable pin
     uint8_t mEnablePin = 0; 

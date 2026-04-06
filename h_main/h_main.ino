@@ -3,30 +3,6 @@
 #include "controller.hpp"
 #include "pin_defns.hpp"
 
-
-void Stop(){
-    SetLRMotors(0, 0); 
-}
-
-void Drive(int speed, float direction){
-    // TurnTo(direction); 
-    SetLRMotors(speed, speed); 
-}
-
-void SetLRMotors(int left, int right){
-    // Tank.setLeftMotorPWM(left); 
-    // Tank.setRightMotorPWM(right); 
-}
-
-void TurnRelative(float rel_direction){
-    // float target = rel_direction + Enes100.getTheta();
-    float target = 0.0;
-    while (target > PI){
-        target-=PI;
-    }
-    // TurnTo(target); 
-}
-
 void WaitUntilSee(float distance){
     // float dist = Tank.readDistanceSensor(1); 
     float dist = 0; 

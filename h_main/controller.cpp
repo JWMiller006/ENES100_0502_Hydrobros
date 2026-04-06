@@ -22,7 +22,7 @@ void PMC::Init(const char* Name, const int MissionType, const int MarkerID, cons
   // Serial.println("Starting"); 
 
   // Connect to vision system
-  // Enes100.begin(Name, MissionType, MarkerID, RoomNumber, Tx_Pin, Rx_Pin);
+  Enes100.begin(Name, MissionType, MarkerID, RoomNumber, Tx_Pin, Rx_Pin);
     
   // Tests connection
   // Enes100.println("It'll all be over this time tomorrow");
