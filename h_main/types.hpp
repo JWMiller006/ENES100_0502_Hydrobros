@@ -3,7 +3,7 @@
 #define PI 3.14159
 
 enum MotorType : unsigned int { 
-  M_None          = 0, 
+  M_None          = 0,                      
   DC_Motor      = 1, 
   Stepper_Motor = 2, 
   Servo_Motor  = 3, 

@@ -50,6 +50,8 @@ class PMC {
     /// Get the distance reading from the given direction
     float GetUSReading(unsigned int Direction); 
 
+    float GetTheta(); 
+
   protected: 
     /// Motor list
     Motor FR{}, FL{}, RR{}, RL{}; 

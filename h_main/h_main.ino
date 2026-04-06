@@ -1,6 +1,7 @@
 // #include <Enes100.h>
 #include "helpers.hpp"
 #include "controller.hpp"
+#include "pin_defns.hpp"
 
 
 void Stop(){
@@ -36,6 +37,16 @@ void WaitUntilSee(float distance){
 }
 
 void setup() {
+    PMC controller("Hydrobros", TEAM_TYPE, TAG_NUMBER, ROOM_NUMBER, WiFi_TX, WiFi_RX);
+
+    controller.Drive(1); 
+
+    // while (true)
+    // {
+        // Serial.print("Theta: "); 
+        // Serial.println(controller.GetTheta()); 
+    // }
+
     // Enes100.begin("Simulator", FIRE, 3, 1116, 8, 9);
     // Tank.begin();
     
@@ -43,41 +54,41 @@ void setup() {
     // Tank.setLeftMotorPWM(255);
     // Tank.setRightMotorPWM(255);
     
-    Drive(255, DegToRad(90)); 
+    // Drive(255, DegToRad(90)); 
     
-    WaitUntilSee(0.4f); 
+    // WaitUntilSee(0.4f); 
     
-    Stop(); 
+    // Stop(); 
     
-    Drive(255, 0.0f); 
+    // Drive(255, 0.0f); 
     
-    WaitUntilSee(0.4f); 
+    // WaitUntilSee(0.4f); 
     
-    Stop(); 
+    // Stop(); 
     
-    Drive(255, DegToRad(-90)); 
+    // Drive(255, DegToRad(-90)); 
     
-    WaitUntilSee(0.9f); 
+    // WaitUntilSee(0.9f); 
     
-    Stop(); 
+    // Stop(); 
     
-    Drive(255, 0.0f); 
+    // Drive(255, 0.0f); 
     
-    WaitUntilSee(0.9f);  
+    // WaitUntilSee(0.9f);  
     
-    Stop(); 
+    // Stop(); 
     
-    Drive(255, DegToRad(90)); 
+    // Drive(255, DegToRad(90)); 
     
-    WaitUntilSee(0.5f); 
+    // WaitUntilSee(0.5f); 
     
-    Stop(); 
+    // Stop(); 
     
-    Drive(255, 0.0f); 
+    // Drive(255, 0.0f); 
     
-    WaitUntilSee(0.25f); 
+    // WaitUntilSee(0.25f); 
     
-    Stop(); 
+    // Stop(); 
     
     // Enes100.println("Finished Driving"); 
 }

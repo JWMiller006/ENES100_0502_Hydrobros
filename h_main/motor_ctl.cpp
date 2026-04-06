@@ -26,7 +26,6 @@ Motor::Motor(const MotorType TypeOfMotor, MotorPos Pos, const uint8_t EnablePin,
 
 /// Run specified motor at specified speed
 void Motor::SetSpeed(const float Speed){
-  // TODO: Add actual pin logic to set the speed (aka enable and set the speed of the motors)
   if (MotorKind == DC_Motor) {
     if (Speed > 0) { // aka go forward
       digitalWrite(mOutOnePin, LOW); 

@@ -18,12 +18,18 @@ PMC::PMC(const char* Name, const int MissionType, const int MarkerID, const int 
 
 /// Sets up the basic connections (i.e. WiFi, sends test message, etc.)
 void PMC::Init(const char* Name, const int MissionType, const int MarkerID, const int RoomNumber, const int Tx_Pin, const int Rx_Pin){
+  // Serial.begin(9600); 
+  // Serial.println("Starting"); 
+
   // Connect to vision system
-  Enes100.begin(Name, MissionType, MarkerID, RoomNumber, Tx_Pin, Rx_Pin);
+  // Enes100.begin(Name, MissionType, MarkerID, RoomNumber, Tx_Pin, Rx_Pin);
     
   // Tests connection
-  Enes100.println("It'll all be over this time tomorrow");
-  Enes100.println("Or we'll just be starting");
+  // Enes100.println("It'll all be over this time tomorrow");
+  // Enes100.println("Or we'll just be starting");
+
+  Serial.begin(9600); 
+  Serial.println("Connected"); 
 
   // Setup DC motors
   FR = Motor(DC_Motor, MotorPos::FrontRight, FORWARD_RIGHT_MOTOR_ENABLE, FORWARD_RIGHT_MOTOR_DRIVER_1, FORWARD_RIGHT_MOTOR_DRIVER_2); 
@@ -68,12 +74,13 @@ void PMC::ReleaseWheels(const bool free, const unsigned int Wheels){
 }
 
 void PMC::SetMotorSpeed(const unsigned int Motors, const float Speed){
+
   if (Motors & FrontRight){
     FR.SetSpeed(Speed); 
   }
 
   if (Motors & FrontLeft){
-    FR.SetSpeed(Speed); 
+    FL.SetSpeed(Speed); 
   }
 
   if (Motors & RearRight){
@@ -205,24 +212,35 @@ void PMC::TurnAboutCorner(const float Theta, unsigned int Axis){
 void PMC::Drive(float Speed, const unsigned int Axis){
   unsigned int forward_motors = 0, reverse_motors = 0;
 
-  if (Axis & (Forward | Right)){
-    forward_motors |= FrontLeft | RearRight; 
-  } else if (Forward | Left){
+  Serial.print("Driving Motors: ");
+  Serial.println(Speed); 
+
+  if (Axis & (Forward | Right) == (Forward | Right)){
+    forward_motors |= FrontLeft | RearRight | FrontRight | RearLeft; 
+    Serial.println("1");
+  } else if (Axis & (Forward | Left) == (Forward | Left)){
     forward_motors |= FrontRight | RearLeft; 
-  } else if (Backward | Right){
+    Serial.println("2");
+  } else if (Axis & (Backward | Right) == (Backward | Right)){
     reverse_motors |= FrontRight | RearLeft;
+    Serial.println("3");
   } else if (Backward | Left){
     reverse_motors |= FrontLeft | RearRight; 
-  }else if (Axis & Forward){
+    Serial.println("4");
+  }else if (Axis & Forward == Forward){
     forward_motors |= FrontRight | FrontLeft | RearRight | RearLeft; 
+    Serial.println("5");
   } else if (Axis & Backward){
     reverse_motors |= FrontRight | FrontLeft | RearRight | RearLeft;
+    Serial.println("6");
   } else if (Axis & Right){
     reverse_motors |= FrontRight | RearLeft; 
     forward_motors |= FrontLeft | RearRight; 
+    Serial.println("7");
   } else if (Axis & Left){
     reverse_motors |= FrontLeft | RearRight; 
     forward_motors |= FrontRight | RearLeft; 
+    Serial.println("8");
   }
 
   SetMotorSpeed(forward_motors, Speed);
@@ -241,7 +259,11 @@ float PMC::GetUSReading(const unsigned int Direction){
   }
 }
 
-
+float PMC::GetTheta(){
+  const float t = Enes100.getTheta();
+  Enes100.println(t); 
+  return t; 
+}
 
 
 
