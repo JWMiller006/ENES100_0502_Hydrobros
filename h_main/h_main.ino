@@ -15,12 +15,14 @@ void WaitUntilSee(float distance){
 void setup() {
     PMC controller("Hydrobros", TEAM_TYPE, TAG_NUMBER, ROOM_NUMBER, WiFi_TX, WiFi_RX);
 
-    controller.Drive(1); 
-
+    while (arduino.running)
+    {
+        controller.Drive(0.5f);
+    }
     // while (true)
     // {
-        // Serial.print("Theta: "); 
-        // Serial.println(controller.GetTheta()); 
+        // Serial.print("Theta: ");
+        // Serial.println(controller.GetTheta());
     // }
 
     // Enes100.begin("Simulator", FIRE, 3, 1116, 8, 9);
