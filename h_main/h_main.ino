@@ -3,6 +3,10 @@
 #include "controller.hpp"
 #include "pin_defns.hpp"
 
+#ifndef RUNNING
+#define RUNNING true
+#endif
+
 void WaitUntilSee(float distance){
     // float dist = Tank.readDistanceSensor(1); 
     float dist = 0; 
@@ -12,12 +16,14 @@ void WaitUntilSee(float distance){
     }
 }
 
+
+
 void setup() {
     PMC controller("Hydrobros", TEAM_TYPE, TAG_NUMBER, ROOM_NUMBER, WiFi_TX, WiFi_RX);
 
-    while (arduino.running)
+    while (RUNNING)
     {
-        controller.Drive(0.5f);
+        controller.Drive(1, Forward);
     }
     // while (true)
     // {
