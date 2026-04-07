@@ -49,7 +49,7 @@ Motor::~Motor(){
 
 /// Activate motor pin
 void Motor::EnableMotor(bool Enable){
-  FreeWheels(false); 
+  FreeWheels(false);
 }
 
 /// Allow the motor to move freely
