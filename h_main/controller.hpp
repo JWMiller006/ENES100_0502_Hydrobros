@@ -9,10 +9,10 @@ class PMC {
     /*                Initialization Section                 */
     /*********************************************************/
     
-    /// Defualt contructor
+    /// Default constructor
     PMC(); 
 
-    /// Contructor that automatically starts setup
+    /// Constructor that automatically starts setup
     PMC(const char* Name, int MissionType, int MarkerID, int RoomNumber, int Tx_Pin, int Rx_Pin);
 
     /// Sets up the basic connections (i.e. WiFi, sends test message, etc.)
@@ -70,7 +70,7 @@ class PMC {
     bool bInitialized = false; 
 
     /// The or-ed together bits that specify the arena setup
-    unsigned int mArragement = 0; 
+    unsigned int mArrangement = 0;
 };
 
 
