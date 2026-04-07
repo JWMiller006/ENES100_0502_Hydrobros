@@ -2,6 +2,7 @@
 #include "helpers.hpp"
 #include "controller.hpp"
 #include "pin_defns.hpp"
+#include "types.hpp"
 
 #ifndef RUNNING
 #define RUNNING true
@@ -20,76 +21,9 @@ PMC controller;
 
 void setup()
 {
-    controller = PMC("Hydrobros", TEAM_TYPE, TAG_NUMBER, ROOM_NUMBER, WiFi_TX, WiFi_RX);
+    controller = PMC(TEAM_NAME, TEAM_TYPE, TAG_NUMBER, ROOM_NUMBER, WiFi_TX, WiFi_RX);
 
-    while (true)
-    {
-        controller.Drive(0.25f, Right);
-        delay(2500);
-        controller.Drive(0.6f, Left);
-        delay(2500);
-        controller.Drive(1.0f, Forward | Right);
-        delay(2500);
-        controller.Drive(0.75f, Forward | Left);
-        delay(2500);
-        controller.Drive(0.5f, Forward | Right);
-        delay(2500);
-        controller.Drive(0.9f, Backward | Right);
-        delay(2500);
-        controller.Drive(1.0f, Backward | Left);
-        delay(2500);
-    }
-
-    // while (true)
-    // {
-        // Serial.print("Theta: ");
-        // Serial.println(controller.GetTheta());
-    // }
-
-    // Enes100.begin("Simulator", FIRE, 3, 1116, 8, 9);
-    // Tank.begin();
-    
-    // Enes100.println("Starting driving");
-    // Tank.setLeftMotorPWM(255);
-    // Tank.setRightMotorPWM(255);
-    
-    // Drive(255, DegToRad(90)); 
-    
-    // WaitUntilSee(0.4f); 
-    
-    // Stop(); 
-    
-    // Drive(255, 0.0f); 
-    
-    // WaitUntilSee(0.4f); 
-    
-    // Stop(); 
-    
-    // Drive(255, DegToRad(-90)); 
-    
-    // WaitUntilSee(0.9f); 
-    
-    // Stop(); 
-    
-    // Drive(255, 0.0f); 
-    
-    // WaitUntilSee(0.9f);  
-    
-    // Stop(); 
-    
-    // Drive(255, DegToRad(90)); 
-    
-    // WaitUntilSee(0.5f); 
-    
-    // Stop(); 
-    
-    // Drive(255, 0.0f); 
-    
-    // WaitUntilSee(0.25f); 
-    
-    // Stop(); 
-    
-    // Enes100.println("Finished Driving"); 
+    controller.RunMission(Debug);
 }
 
 void loop() {

@@ -7,7 +7,11 @@
 #include "types.hpp"
 #include "us_ctl.hpp"
 
-/// Defualt contructor
+#ifndef SIMULATOR
+#define SIMULATOR false
+#endif
+
+/// Default constructor
 PMC::PMC(){
   // Do nothing
 }
@@ -16,26 +20,23 @@ PMC::PMC(const char* Name, const int MissionType, const int MarkerID, const int 
   Init(Name, MissionType, MarkerID, RoomNumber, Tx_Pin, Rx_Pin); 
 }
 
-/// Sets up the basic connections (i.e. WiFi, sends test message, etc.)
+/// Sets up the basic connections (i.e. Wi-Fi, sends test message, etc.)
 void PMC::Init(const char* Name, const int MissionType, const int MarkerID, const int RoomNumber, const int Tx_Pin, const int Rx_Pin){
-  // Serial.begin(9600); 
-  // Serial.println("Starting"); 
-
   // Connect to vision system
   Enes100.begin(Name, MissionType, MarkerID, RoomNumber, Tx_Pin, Rx_Pin);
     
   // Tests connection
-  // Enes100.println("It'll all be over this time tomorrow");
-  // Enes100.println("Or we'll just be starting");
+  Enes100.println("It'll all be over this time tomorrow");
+  Enes100.println("Or we'll just be starting");
 
   Serial.begin(9600); 
   Serial.println("Connected"); 
 
   // Setup DC motors
-  FR = Motor(DC_Motor, MotorPos::FrontRight, FORWARD_RIGHT_MOTOR_ENABLE, FORWARD_RIGHT_MOTOR_DRIVER_1, FORWARD_RIGHT_MOTOR_DRIVER_2); 
-  FL = Motor(DC_Motor, MotorPos::FrontLeft, FORWARD_LEFT_MOTOR_ENABLE, FORWARD_LEFT_MOTOR_DRIVER_1, FORWARD_LEFT_MOTOR_DRIVER_2);
-  RR = Motor(DC_Motor, MotorPos::RearRight, REAR_RIGHT_MOTOR_ENABLE, REAR_RIGHT_MOTOR_DRIVER_1, REAR_RIGHT_MOTOR_DRIVER_2); 
-  RL = Motor(DC_Motor, MotorPos::RearLeft, REAR_LEFT_MOTOR_ENABLE, REAR_LEFT_MOTOR_DRIVER_1, REAR_LEFT_MOTOR_DRIVER_2);
+  FR = Motor(DC_Motor, FrontRight, FORWARD_RIGHT_MOTOR_ENABLE, FORWARD_RIGHT_MOTOR_DRIVER_1, FORWARD_RIGHT_MOTOR_DRIVER_2);
+  FL = Motor(DC_Motor, FrontLeft, FORWARD_LEFT_MOTOR_ENABLE, FORWARD_LEFT_MOTOR_DRIVER_1, FORWARD_LEFT_MOTOR_DRIVER_2);
+  RR = Motor(DC_Motor, RearRight, REAR_RIGHT_MOTOR_ENABLE, REAR_RIGHT_MOTOR_DRIVER_1, REAR_RIGHT_MOTOR_DRIVER_2);
+  RL = Motor(DC_Motor, RearLeft, REAR_LEFT_MOTOR_ENABLE, REAR_LEFT_MOTOR_DRIVER_1, REAR_LEFT_MOTOR_DRIVER_2);
 
   // Setup US Sensors
   ForwardUS = UltraSonicSensor(FORWARD_US_TRIGGER, FORWARD_US_ECHO); 
@@ -45,8 +46,35 @@ void PMC::Init(const char* Name, const int MissionType, const int MarkerID, cons
   bInitialized = true; 
 }
 
-void PMC::RunMission(){
+void PMC::RunMission(MissionType Mission){
   // Add code here to go through the parts of the mission (i.e. locate mission objective, measure data points, etc.)
+  if (Mission == FullMission){
+    // Go to the center of the arena
+    GoToPosition(Point(5.0f, 5.0f));
+
+    // Turn to the right
+    TurnTo(PI / 2.0f);
+
+    // Drive forward until we see an obstacle within 20 cm
+    Drive(1.0f, Forward);
+    WaitUntilSee(20.0f);
+    Stop();
+  } else if (Mission == DriveForward){
+
+    Drive(1.0f, Forward);
+    delay(2000);
+    Stop();
+  } else if (Mission == DetectObstacles){
+    // Drive forward until we see an obstacle within 20 cm
+    Drive(1.0f, Forward);
+    WaitUntilSee(20.0f);
+    Stop();
+  } else if (Mission == Debug){
+    // Add code here to test out different functions and movements
+  } else
+  {
+    Enes100.println("Error: Invalid Mission Type!");
+  }
 }
 
 void PMC::Stop(){
@@ -100,7 +128,7 @@ void PMC::GoToPosition(const Point& p){
 
 /// Get the direction that we need to turn in order to get to the specified theta
 int GetDirTheta(const float target_theta, const float range = 0.05){
-    int dir; 
+    int dir;
     float theta = Enes100.getTheta();
     if (target_theta - theta > range){
         dir = 1; 
@@ -109,8 +137,6 @@ int GetDirTheta(const float target_theta, const float range = 0.05){
     } else {
         dir = 0; 
     }
-
-    
     
     return dir; 
 }
@@ -134,16 +160,20 @@ void PMC::TurnTo(float direction, unsigned int axis){
 }
 
 void PMC::TurnAboutCenter(const float Theta){
-  int dir = GetDirTheta(Theta); 
+  int dir = GetDirTheta(Theta);
 
   // Turn at the given rate (between 0 and 1)
   constexpr float turn_speed = TURN_SPEED; 
 
   while (dir != 0){
-    SetMotorSpeed(FrontRight | RearRight, dir * turn_speed);
-    SetMotorSpeed(FrontLeft | RearLeft, -1 * dir * turn_speed); 
+    SetMotorSpeed(FrontRight | RearRight, (float)dir * turn_speed);
+    SetMotorSpeed(FrontLeft | RearLeft, -1.0f * (float)dir * turn_speed);
 
-    dir = GetDirTheta(Theta); 
+    #if SIMULATOR
+    delay(10);
+    #endif
+
+    dir = GetDirTheta(Theta);
   }
 
   Stop(); 
@@ -223,7 +253,7 @@ void PMC::Drive(float Speed, const unsigned int Axis){
   } else if ((Axis & (Backward | Left)) == (Backward | Left)){
     reverse_motors |= FrontLeft | RearRight;
     off_motors |= FrontLeft | RearRight;
-  }else if (Axis & Forward){
+  } else if (Axis & Forward){
     forward_motors |= FrontRight | FrontLeft | RearRight | RearLeft;
   } else if (Axis & Backward){
     reverse_motors |= FrontRight | FrontLeft | RearRight | RearLeft;
@@ -238,6 +268,15 @@ void PMC::Drive(float Speed, const unsigned int Axis){
   SetMotorSpeed(forward_motors, Speed);
   SetMotorSpeed(reverse_motors, -1.0f * Speed);
   SetMotorSpeed(off_motors, 0.0f);
+}
+
+void PMC::WaitUntilSee(float Distance, unsigned int Direction)
+{
+  float read_dist = GetUSReading(Direction);
+  while (Distance > read_dist)
+  {
+    read_dist = GetUSReading(Direction);
+  }
 }
 
 float PMC::GetUSReading(const unsigned int Direction){
@@ -256,6 +295,21 @@ float PMC::GetTheta(){
   const float t = Enes100.getTheta();
   Enes100.println(t); 
   return t; 
+}
+
+Point PMC::GetPosition()
+{
+  return {GetX(), GetY()};
+}
+
+float PMC::GetX()
+{
+  return Enes100.getX();
+}
+
+float PMC::GetY()
+{
+  return Enes100.getY();
 }
 
 

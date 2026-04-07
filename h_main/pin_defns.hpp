@@ -2,8 +2,9 @@
 #define ROOM_NUMBER 1116
 #define TAG_NUMBER 499
 #define TEAM_TYPE 6  // From Enes100.h defns for hydrogen
+#define TEAM_NAME "Hydrobros"
 
-#define TURN_SPEED 0.5
+#define TURN_SPEED 0.35
 
 #define FORWARD_RIGHT_MOTOR_ENABLE 2
 #define FORWARD_RIGHT_MOTOR_DRIVER_1 6

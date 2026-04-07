@@ -19,7 +19,7 @@ class PMC {
     void Init(const char* Name, int MissionType, int MarkerID, int RoomNumber, int Tx_Pin, int Rx_Pin); 
 
     /// Runs through the final code (from start to finish)
-    void RunMission(); 
+    void RunMission(MissionType MissionType);
 
     /*********************************************************/
     /*                 Motor Control Section                 */
@@ -43,6 +43,9 @@ class PMC {
     /// Set the motors to drive on the given axis (including strafing)
     void Drive(float Speed, unsigned int Axis = Forward);
 
+    /// Wait until an object is detected
+    void WaitUntilSee(float Distance, unsigned int Direction = Forward);
+
     /*********************************************************/
     /*                Sensor Control Section                 */
     /*********************************************************/
@@ -50,7 +53,17 @@ class PMC {
     /// Get the distance reading from the given direction
     float GetUSReading(unsigned int Direction); 
 
-    float GetTheta(); 
+    /// Get the theta from the vision system
+    float GetTheta();
+
+    /// Gets the full position as a point
+    Point GetPosition();
+
+    /// Gets the X-Coordinate as a position
+    float GetX();
+
+    /// Gets the Y-Coordinate as a position
+    float GetY();
 
   protected: 
     /// Motor list
