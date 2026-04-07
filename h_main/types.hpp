@@ -62,6 +62,16 @@ enum MissionType : unsigned int {
 
 /// 2D point on the arena
 struct Point {
+  Point()
+  {
+    x = 0.0f; y = 0.0f;
+  }
+
+  Point(const float x, const float y) {
+    this->x = x;
+    this->y = y;
+  }
+
   float x, y;
 };
 
