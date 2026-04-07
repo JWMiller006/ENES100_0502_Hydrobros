@@ -210,16 +210,19 @@ void PMC::TurnAboutCorner(const float Theta, unsigned int Axis){
 }
 
 void PMC::Drive(float Speed, const unsigned int Axis){
-  unsigned int forward_motors = 0, reverse_motors = 0;
+  unsigned int forward_motors = 0, reverse_motors = 0, off_motors = 0;
 
   if ((Axis & (Forward | Right)) == (Forward | Right)){
     forward_motors |= FrontLeft | RearRight | FrontRight | RearLeft;
   } else if ((Axis & (Forward | Left)) == (Forward | Left)){
     forward_motors |= FrontRight | RearLeft;
+    off_motors |= FrontLeft | RearRight;
   } else if ((Axis & (Backward | Right)) == (Backward | Right)){
     reverse_motors |= FrontRight | RearLeft;
+    off_motors |= FrontLeft | RearRight;
   } else if ((Axis & (Backward | Left)) == (Backward | Left)){
     reverse_motors |= FrontLeft | RearRight;
+    off_motors |= FrontLeft | RearRight;
   }else if (Axis & Forward){
     forward_motors |= FrontRight | FrontLeft | RearRight | RearLeft;
   } else if (Axis & Backward){
@@ -233,7 +236,8 @@ void PMC::Drive(float Speed, const unsigned int Axis){
   }
 
   SetMotorSpeed(forward_motors, Speed);
-  SetMotorSpeed(reverse_motors, -1.0 * Speed);
+  SetMotorSpeed(reverse_motors, -1.0f * Speed);
+  SetMotorSpeed(off_motors, 0.0f);
 }
 
 float PMC::GetUSReading(const unsigned int Direction){

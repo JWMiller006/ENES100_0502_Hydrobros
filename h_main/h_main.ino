@@ -24,20 +24,21 @@ void setup()
 
     while (true)
     {
-        controller.Drive(0.5f, Right);
-    delay(2500);
-    controller.Drive(0.5f, Left);
-    delay(2500);
-    controller.Drive(0.5f, Forward | Right);
-    delay(2500);
-    controller.Drive(0.5f, Forward | Left);
-    delay(2500);
-    controller.Drive(0.5f, Forward | Right);
-    delay(2500);
-    controller.Drive(0.5f, Backward | Left);
-    delay(2500);
-    controller.Drive(0.5f, Backward | Left);
-}
+        controller.Drive(0.25f, Right);
+        delay(2500);
+        controller.Drive(0.6f, Left);
+        delay(2500);
+        controller.Drive(1.0f, Forward | Right);
+        delay(2500);
+        controller.Drive(0.75f, Forward | Left);
+        delay(2500);
+        controller.Drive(0.5f, Forward | Right);
+        delay(2500);
+        controller.Drive(0.9f, Backward | Right);
+        delay(2500);
+        controller.Drive(1.0f, Backward | Left);
+        delay(2500);
+    }
 
     // while (true)
     // {
