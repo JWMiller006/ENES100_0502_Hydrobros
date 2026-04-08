@@ -41,7 +41,7 @@ enum MovementDir : unsigned int {
 /******************************/
 
 /// Binary or these together to make the map
-enum Arragnement : unsigned int {
+enum Arrangement : unsigned int {
   Unknown       = 0, 
   A             = 1 << 0,   // Or this in if there is an obstacle at pos A
   B             = 1 << 1,   // Or this in if there is an obstacle at pos B
@@ -78,13 +78,13 @@ struct Point {
 /**************************************/
 /*********** Position Chart ***********/
 /*                                 |   *
-*   B    O1     |     O4         L | F *
+*   B    O1    L1     O4         L | F *
 *   C                              |   *
 *                                  |   *
-*   E    O2     |     O5     G     -   *
+*   E    O2    L2     O5     G     -   *
 *                                  |   *
 *   D                              |   *
-*   A    O3     |     O6           |   *
+*   A    O3    L3     O6           |   *
 *                                  |   */
 /**************************************/
 
@@ -103,6 +103,9 @@ static Point gPoints[] = {
   {2.17f, 1.60f},     // O4
   {2.21f, 0.95f},     // O5
   {2.20f, 0.40f},     // O6
+  {1.70f, 1.60f},     // L1
+  {1.70f, 1.00f},     // L2
+  {1.70f, 0.40f},     // L3
 };
 
 enum Position : unsigned short {
@@ -120,6 +123,9 @@ enum Position : unsigned short {
   PO4 = 11,
   PO5 = 12,
   PO6 = 13,
+  PL1 = 14,
+  PL2 = 15,
+  PL3 = 16,
 };
 
 

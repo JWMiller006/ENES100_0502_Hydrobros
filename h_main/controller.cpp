@@ -31,7 +31,7 @@ void PMC::Init(const char* Name, const int MissionType, const int MarkerID, cons
   Enes100.println("Or we'll just be starting");
 
   Serial.begin(9600); 
-  Serial.println("Connected"); 
+  Serial.println("Serial Connected");
 
   // Setup DC motors
   FR = Motor(DC_Motor, FrontRight, FORWARD_RIGHT_MOTOR_ENABLE, FORWARD_RIGHT_MOTOR_DRIVER_1, FORWARD_RIGHT_MOTOR_DRIVER_2);
@@ -42,7 +42,10 @@ void PMC::Init(const char* Name, const int MissionType, const int MarkerID, cons
   // Setup US Sensors
   ForwardUS = UltraSonicSensor(FORWARD_US_TRIGGER, FORWARD_US_ECHO); 
   RightUS = UltraSonicSensor(RIGHT_US_TRIGGER, RIGHT_US_ECHO); 
-  LeftUS = UltraSonicSensor(LEFT_US_TRIGGER, LEFT_US_ECHO); 
+  LeftUS = UltraSonicSensor(LEFT_US_TRIGGER, LEFT_US_ECHO);
+
+  // Setup CS Sensor
+  // TODO: Port CS Sensor code from Sampurna
 
   bInitialized = true; 
 }
@@ -62,9 +65,9 @@ void PMC::RunMission(const MissionType Mission){
 
       // Get initial reading
       if (const float obstacle_one = GetUSReading(Left); obstacle_one < 1.5f) {
-        mArrangement |= PO1;
+        mArrangement |= A;
       } else {
-        mArrangement |= PO4;
+        mArrangement |= D;
       }
 
       // Go to the next position to get a reading
@@ -72,9 +75,9 @@ void PMC::RunMission(const MissionType Mission){
 
       // Get US Reading on left side
       if (const float obstacle_two = GetUSReading(Left); obstacle_two < 1.5f) {
-        mArrangement |= PO2;
+        mArrangement |= B;
       } else {
-        mArrangement |= PO5;
+        mArrangement |= E;
       }
     } else {
       target_position = gPoints[PB];
@@ -82,9 +85,9 @@ void PMC::RunMission(const MissionType Mission){
 
       // Get initial reading
       if (const float obstacle_one = GetUSReading(Right); obstacle_one < 1.5f) {
-        mArrangement |= PO1;
+        mArrangement |= C;
       } else {
-        mArrangement |= PO4;
+        mArrangement |= F;
       }
 
       // Go to the next position to get a reading
@@ -92,9 +95,9 @@ void PMC::RunMission(const MissionType Mission){
 
       // Get US Reading on right side
       if (const float obstacle_two = GetUSReading(Right); obstacle_two < 1.5f) {
-        mArrangement |= PO2;
+        mArrangement |= B;
       } else {
-        mArrangement |= PO5;
+        mArrangement |= E;
       }
     }
 
@@ -112,6 +115,20 @@ void PMC::RunMission(const MissionType Mission){
 
     // From here, complete logic for completing the mission task. While it is doing that,
     //    we can also be choosing a path to complete the navigation part of the mission
+    Enes100.println("TODO: Add mission specific tasking");
+
+    // Now that we have completed the task, we can follow the path to the end of the arena
+    mPath = SelectPath(mArrangement);
+    Enes100.println("Selected Path:");
+    for (unsigned short i = 0; i < mPath.num_points; i++){
+      Enes100.println("X");
+      Enes100.println(mPath.points[i].x);
+      Enes100.println("Y");
+      Enes100.println(mPath.points[i].y);
+    }
+    FollowPath(mPath, Forward, 0.05f);
+
+    MarkCompleteMission();
 
   } else if (Mission == DriveForward){
 
@@ -123,12 +140,27 @@ void PMC::RunMission(const MissionType Mission){
     Drive(1.0f, Forward);
     WaitUntilSee(20.0f);
     Stop();
+    Enes100.println("Obstacle detected! Stopping movement.");
   } else if (Mission == Debug){
     // Add code here to test out different functions and movements
   } else
   {
     Enes100.println("Error: Invalid Mission Type!");
   }
+}
+
+void PMC::MarkCompleteMission() {
+  Enes100.println("Mission Complete!");
+  const Point current_position = GetPosition();
+  const float current_theta = GetTheta();
+
+  Enes100.println("Final Theta:");
+  Enes100.println(current_theta);
+  Enes100.println("Current Position:");
+  Enes100.println("X");
+  Enes100.println(current_position.x);
+  Enes100.println("Y");
+  Enes100.println(current_position.y);
 }
 
 void PMC::Stop(){
@@ -174,17 +206,30 @@ void PMC::SetMotorSpeed(const unsigned int Motors, const float Speed){
   }
 }
 
-void PMC::GoToPosition(const Point& p, const unsigned int US_Override, const float DistOverride){
+void PMC::GoToPosition(const Point& p, float ThetaBound, unsigned int US_Override, float DistOverride){
   Point current_position = GetPosition();
-  if (const float target_theta = atan2(p.y - current_position.y, p.x - current_position.x); target_theta > 0.01f) {
+  float target_theta = atan2(p.y - current_position.y, p.x - current_position.x);
+
+  if (target_theta > 0.01f) {
     TurnTo(target_theta, Center | Turn);
   }
 
   Drive(1.0f, Forward);
   float prev_distance = distance(current_position, p);
   float curr_distance = distance(current_position, p);
+  float curr_theta = GetTheta();
   while (curr_distance > 0.05f){
     current_position = GetPosition();
+
+    if (ThetaBound > 0.01f){
+      curr_theta = GetTheta();
+      if (curr_theta - target_theta > ThetaBound || curr_theta - target_theta < -1.0f * ThetaBound) {
+        Stop();
+        target_theta = atan2(p.y - current_position.y, p.x - current_position.x);
+        TurnTo(target_theta, Center | Turn);
+        Drive(1.0f, Forward);
+      }
+    }
 
     if (prev_distance - 0.05f < curr_distance) {
       if (const float temp_theta = atan2(p.y - current_position.y, p.x - current_position.x); temp_theta > 0.01f) {
@@ -361,6 +406,13 @@ void PMC::WaitUntilSee(float Distance, unsigned int Direction)
   }
 }
 
+void PMC::FollowPath(Path &path, unsigned int US_Override, float DistOverride) {
+  while (!path.empty()) {
+    const Point next_point = path.GetNextPoint();
+    GoToPosition(next_point, 0.05f, US_Override, DistOverride);
+  }
+}
+
 float PMC::GetUSReading(const unsigned int Direction){
   if (Direction & Forward){
     return ForwardUS.GetDistance();
@@ -375,7 +427,7 @@ float PMC::GetUSReading(const unsigned int Direction){
 
 float PMC::GetTheta(){
   const float t = Enes100.getTheta();
-  Enes100.println(t); 
+  // Enes100.println(t);
   return t; 
 }
 

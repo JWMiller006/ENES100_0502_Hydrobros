@@ -1,6 +1,7 @@
 #pragma once
 #include "motor_ctl.hpp"
 #include "us_ctl.hpp"
+#include "path.hpp"
 
 /// Primary Mission-Control
 class PMC {
@@ -21,6 +22,8 @@ class PMC {
     /// Runs through the final code (from start to finish)
     void RunMission(MissionType MissionType);
 
+    void MarkCompleteMission();
+
     /*********************************************************/
     /*                 Motor Control Section                 */
     /*********************************************************/
@@ -35,7 +38,7 @@ class PMC {
     void SetMotorSpeed(unsigned int Motors, float Speed); 
 
     /// Goes to a specific point on a 2D plane (in the arena)
-    void GoToPosition(const Point& p, unsigned int US_Override = MD_None, float DistOverride = -1.0f);
+    void GoToPosition(const Point& p, float ThetaBound = 0.0f, unsigned int US_Override = MD_None, float DistOverride = -1.0f);
 
     /// Turn to a specific theta (in radians) on the given axis
     void TurnTo(float Theta, unsigned int Axis = Center | Turn);
@@ -45,6 +48,9 @@ class PMC {
 
     /// Wait until an object is detected
     void WaitUntilSee(float Distance, unsigned int Direction = Forward);
+
+    /// Follows the given path from the current position
+    void FollowPath(Path& path, unsigned int US_Override = MD_None, float DistOverride = -1.0f);
 
     /*********************************************************/
     /*                Sensor Control Section                 */
@@ -83,7 +89,9 @@ class PMC {
     bool bInitialized = false; 
 
     /// The or-ed together bits that specify the arena setup
-    unsigned int mArrangement = 0;
+    unsigned int mArrangement = Unknown;
+
+    Path mPath{};
 
     /// The starting position of the OTV (used to determine the arrangement)
     Point mStartPosition;
