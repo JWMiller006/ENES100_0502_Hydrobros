@@ -35,7 +35,7 @@ class PMC {
     void SetMotorSpeed(unsigned int Motors, float Speed); 
 
     /// Goes to a specific point on a 2D plane (in the arena)
-    void GoToPosition(const Point& p); 
+    void GoToPosition(const Point& p, unsigned int US_Override = MD_None, float DistOverride = -1.0f);
 
     /// Turn to a specific theta (in radians) on the given axis
     void TurnTo(float Theta, unsigned int Axis = Center | Turn);
@@ -84,6 +84,9 @@ class PMC {
 
     /// The or-ed together bits that specify the arena setup
     unsigned int mArrangement = 0;
+
+    /// The starting position of the OTV (used to determine the arrangement)
+    Point mStartPosition;
 };
 
 

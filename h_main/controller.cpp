@@ -1,5 +1,6 @@
 /*!!!!!!!!!!!!!!!!!!! NOTE: THIS IS THE ONLY PLACE IN THE PROJECT WHERE ENES100.h CAN BE INCLUDED !!!!!!!!!!!!!!!!!!!!!*/
-#include <Enes100.h>      
+#include <Enes100.h>
+#include <math.h>
 #include "controller.hpp"
 #include "pin_defns.hpp"
 #include "motor_ctl.hpp"
@@ -46,19 +47,72 @@ void PMC::Init(const char* Name, const int MissionType, const int MarkerID, cons
   bInitialized = true; 
 }
 
-void PMC::RunMission(MissionType Mission){
+void PMC::RunMission(const MissionType Mission){
   // Add code here to go through the parts of the mission (i.e. locate mission objective, measure data points, etc.)
   if (Mission == FullMission){
-    // Go to the center of the arena
-    GoToPosition(Point(5.0f, 5.0f));
+    mStartPosition = GetPosition();
+    mArrangement = 0;
+    Point target_position;
 
-    // Turn to the right
-    TurnTo(PI / 2.0f);
+    // Assuming that we are within acceptable x-coordinate range (normal starting range)
+    if (mStartPosition.y > 1.0f) {
+      target_position = gPoints[PA];
+      mArrangement |= Inverse;
+      TurnTo(DegToRad(-90.0f));
 
-    // Drive forward until we see an obstacle within 20 cm
-    Drive(1.0f, Forward);
-    WaitUntilSee(20.0f);
-    Stop();
+      // Get initial reading
+      if (const float obstacle_one = GetUSReading(Left); obstacle_one < 1.5f) {
+        mArrangement |= PO1;
+      } else {
+        mArrangement |= PO4;
+      }
+
+      // Go to the next position to get a reading
+      GoToPosition(gPoints[PE]);
+
+      // Get US Reading on left side
+      if (const float obstacle_two = GetUSReading(Left); obstacle_two < 1.5f) {
+        mArrangement |= PO2;
+      } else {
+        mArrangement |= PO5;
+      }
+    } else {
+      target_position = gPoints[PB];
+      TurnTo(DegToRad(90.0f));
+
+      // Get initial reading
+      if (const float obstacle_one = GetUSReading(Right); obstacle_one < 1.5f) {
+        mArrangement |= PO1;
+      } else {
+        mArrangement |= PO4;
+      }
+
+      // Go to the next position to get a reading
+      GoToPosition(gPoints[PE]);
+
+      // Get US Reading on right side
+      if (const float obstacle_two = GetUSReading(Right); obstacle_two < 1.5f) {
+        mArrangement |= PO2;
+      } else {
+        mArrangement |= PO5;
+      }
+    }
+
+    // Update current position
+    auto current_position = GetPosition();
+
+    // line up the x-coordinate
+    GoToPosition({target_position.x, current_position.y});
+
+    // Update current position again
+    current_position = GetPosition();
+
+    // line up the y-coordinate
+    GoToPosition({current_position.x, target_position.y}, Forward, 5.0f);
+
+    // From here, complete logic for completing the mission task. While it is doing that,
+    //    we can also be choosing a path to complete the navigation part of the mission
+
   } else if (Mission == DriveForward){
 
     Drive(1.0f, Forward);
@@ -120,17 +174,45 @@ void PMC::SetMotorSpeed(const unsigned int Motors, const float Speed){
   }
 }
 
-void PMC::GoToPosition(const Point& p){
-  // TODO: Add code to traverse to a position (probably best in a straight line)
-  //       Note that it would be best to check how far off the points are and if 
-  //       they are too far off, stop and adjust
+void PMC::GoToPosition(const Point& p, const unsigned int US_Override, const float DistOverride){
+  Point current_position = GetPosition();
+  if (const float target_theta = atan2(p.y - current_position.y, p.x - current_position.x); target_theta > 0.01f) {
+    TurnTo(target_theta, Center | Turn);
+  }
+
+  Drive(1.0f, Forward);
+  float prev_distance = distance(current_position, p);
+  float curr_distance = distance(current_position, p);
+  while (curr_distance > 0.05f){
+    current_position = GetPosition();
+
+    if (prev_distance - 0.05f < curr_distance) {
+      if (const float temp_theta = atan2(p.y - current_position.y, p.x - current_position.x); temp_theta > 0.01f) {
+        Stop();
+        TurnTo(temp_theta, Center | Turn);
+        Drive(1.0f, Forward);
+      }
+    }
+
+    prev_distance = curr_distance;
+    curr_distance = distance(current_position, p);
+
+    if (US_Override != MD_None){
+      if (const float dist = GetUSReading(US_Override); dist < DistOverride && dist > 0.0f){
+        Stop();
+        Enes100.println("Obstacle detected! Stopping movement.");
+        return;
+      }
+    }
+  }
+
+  Stop();
 }
 
 /// Get the direction that we need to turn in order to get to the specified theta
 int GetDirTheta(const float target_theta, const float range = 0.05){
     int dir;
-    float theta = Enes100.getTheta();
-    if (target_theta - theta > range){
+    if (const float theta = Enes100.getTheta(); target_theta - theta > range){
         dir = 1; 
     } else if (target_theta - theta < -1.0 * range) {
         dir = -1; 

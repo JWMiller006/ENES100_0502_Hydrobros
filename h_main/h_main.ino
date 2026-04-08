@@ -23,7 +23,7 @@ void setup()
 {
     controller = PMC(TEAM_NAME, TEAM_TYPE, TAG_NUMBER, ROOM_NUMBER, WiFi_TX, WiFi_RX);
 
-    controller.RunMission(Debug);
+    controller.RunMission(FullMission);
 }
 
 void loop() {
