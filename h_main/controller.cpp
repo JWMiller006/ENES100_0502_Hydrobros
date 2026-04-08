@@ -132,12 +132,12 @@ void PMC::RunMission(const MissionType Mission){
 
   } else if (Mission == DriveForward){
 
-    Drive(1.0f, Forward);
+    Drive(0.75f, Forward);
     delay(2000);
     Stop();
   } else if (Mission == DetectObstacles){
     // Drive forward until we see an obstacle within 20 cm
-    Drive(1.0f, Forward);
+    Drive(0.75f, Forward);
     WaitUntilSee(20.0f);
     Stop();
     Enes100.println("Obstacle detected! Stopping movement.");
@@ -214,20 +214,18 @@ void PMC::GoToPosition(const Point& p, float ThetaBound, unsigned int US_Overrid
     TurnTo(target_theta, Center | Turn);
   }
 
-  Drive(1.0f, Forward);
+  Drive(GLOBAL_DRIVE_SPEED, Forward);
   float prev_distance = distance(current_position, p);
   float curr_distance = distance(current_position, p);
-  float curr_theta = GetTheta();
   while (curr_distance > 0.05f){
     current_position = GetPosition();
 
     if (ThetaBound > 0.01f){
-      curr_theta = GetTheta();
-      if (curr_theta - target_theta > ThetaBound || curr_theta - target_theta < -1.0f * ThetaBound) {
+      if (const float curr_theta = GetTheta(); curr_theta - target_theta > ThetaBound || curr_theta - target_theta < -1.0f * ThetaBound) {
         Stop();
         target_theta = atan2(p.y - current_position.y, p.x - current_position.x);
         TurnTo(target_theta, Center | Turn);
-        Drive(1.0f, Forward);
+        Drive(GLOBAL_DRIVE_SPEED, Forward);
       }
     }
 
@@ -235,7 +233,7 @@ void PMC::GoToPosition(const Point& p, float ThetaBound, unsigned int US_Overrid
       if (const float temp_theta = atan2(p.y - current_position.y, p.x - current_position.x); temp_theta > 0.01f) {
         Stop();
         TurnTo(temp_theta, Center | Turn);
-        Drive(1.0f, Forward);
+        Drive(GLOBAL_DRIVE_SPEED, Forward);
       }
     }
 

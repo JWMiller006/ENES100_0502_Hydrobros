@@ -4,7 +4,8 @@
 #define TEAM_TYPE 6  // From Enes100.h defns for hydrogen
 #define TEAM_NAME "Hydrobros"
 
-#define TURN_SPEED 0.35
+#define TURN_SPEED 0.35f
+#define GLOBAL_DRIVE_SPEED 1.0f
 
 #define FORWARD_RIGHT_MOTOR_ENABLE 2
 #define FORWARD_RIGHT_MOTOR_DRIVER_1 6
