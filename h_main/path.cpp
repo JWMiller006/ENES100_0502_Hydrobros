@@ -30,16 +30,16 @@ Path SelectPath(unsigned int& Arrangement) {
     if (Arrangement & Inverse) {
         if ((Arrangement & (A | B)) == (A | B)) {
             path.points[0] = gPoints[PO3];
-            path.points[1] = gPoints[PL3];
-            path.points[2] = gPoints[PL1];
+            path.points[1] = gPoints[L3];
+            path.points[2] = gPoints[L1];
             path.points[3] = gPoints[PL];
             path.points[4] = gPoints[PF];
             path.num_points = 5;
             Arrangement |= F;
         } else if (Arrangement & A) {
             path.points[0] = gPoints[PE];
-            path.points[1] = gPoints[PL2];
-            path.points[2] = gPoints[PL1];
+            path.points[1] = gPoints[L2];
+            path.points[2] = gPoints[L1];
             path.points[3] = gPoints[PL];
             path.points[4] = gPoints[PF];
             path.num_points = 5;
@@ -51,8 +51,8 @@ Path SelectPath(unsigned int& Arrangement) {
             Arrangement |= E | F | C;
         } else if (Arrangement & B) {
             path.points[0] = gPoints[PO3];
-            path.points[1] = gPoints[PL3];
-            path.points[2] = gPoints[PL2];
+            path.points[1] = gPoints[L3];
+            path.points[2] = gPoints[L2];
             path.points[3] = gPoints[PG];
             path.points[4] = gPoints[PL];
             path.points[5] = gPoints[PF];
@@ -65,8 +65,8 @@ Path SelectPath(unsigned int& Arrangement) {
             Arrangement |= D | C | F;
         } else {
             path.points[0] = gPoints[PE];
-            path.points[1] = gPoints[PL2];
-            path.points[2] = gPoints[PL3];
+            path.points[1] = gPoints[L2];
+            path.points[2] = gPoints[L3];
             path.points[3] = gPoints[PO6];
             path.points[4] = gPoints[PG];
             path.points[5] = gPoints[PL];
@@ -81,8 +81,8 @@ Path SelectPath(unsigned int& Arrangement) {
     } else {
         if ((Arrangement & (B | C)) == (B | C)) {
             path.points[0] = gPoints[PO1];
-            path.points[1] = gPoints[PL1];
-            path.points[2] = gPoints[PL2];
+            path.points[1] = gPoints[L1];
+            path.points[2] = gPoints[L2];
             path.points[3] = gPoints[PG];
             path.points[4] = gPoints[PL];
             path.points[5] = gPoints[PF];
@@ -95,8 +95,8 @@ Path SelectPath(unsigned int& Arrangement) {
         } else if (Arrangement & C) {
             path.points[0] = gPoints[PE];
             path.points[1] = gPoints[PO2];
-            path.points[2] = gPoints[PL2];
-            path.points[3] = gPoints[PL3];
+            path.points[2] = gPoints[L2];
+            path.points[3] = gPoints[L3];
             path.points[4] = gPoints[PO6];
             path.points[5] = gPoints[PG];
             path.points[6] = gPoints[PL];
@@ -109,8 +109,8 @@ Path SelectPath(unsigned int& Arrangement) {
             Arrangement |= A | D | E;
         } else if (Arrangement & B) {
             path.points[0] = gPoints[PO3];
-            path.points[1] = gPoints[PL3];
-            path.points[2] = gPoints[PL2];
+            path.points[1] = gPoints[L3];
+            path.points[2] = gPoints[L2];
             path.points[3] = gPoints[PG];
             path.points[4] = gPoints[PL];
             path.points[5] = gPoints[PF];
@@ -122,8 +122,8 @@ Path SelectPath(unsigned int& Arrangement) {
             Arrangement |= A | D | F;
         } else {
             path.points[0] = gPoints[PE];
-            path.points[1] = gPoints[PL2];
-            path.points[2] = gPoints[PL1];
+            path.points[1] = gPoints[L2];
+            path.points[2] = gPoints[L1];
             path.points[3] = gPoints[PL];
             path.points[4] = gPoints[PF];
             path.num_points = 5;

@@ -123,9 +123,9 @@ enum Position : unsigned short {
   PO4 = 11,
   PO5 = 12,
   PO6 = 13,
-  PL1 = 14,
-  PL2 = 15,
-  PL3 = 16,
+  L1 = 14,
+  L2 = 15,
+  L3 = 16
 };
 
 

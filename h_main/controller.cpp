@@ -143,6 +143,11 @@ void PMC::RunMission(const MissionType Mission){
     Enes100.println("Obstacle detected! Stopping movement.");
   } else if (Mission == Debug){
     // Add code here to test out different functions and movements
+    TurnTo(DegToRad(90.0f));
+    delay(1000);
+    TurnTo(DegToRad(0.0f));
+    delay(1000);
+    delay(100); 
   } else
   {
     Enes100.println("Error: Invalid Mission Type!");
