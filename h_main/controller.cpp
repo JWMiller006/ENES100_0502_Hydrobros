@@ -51,8 +51,16 @@ void PMC::Init(const char* Name, const int MissionType, const int MarkerID, cons
 }
 
 void PMC::RunMission(const MissionType Mission){
+  Enes100.println("Mission Type: ");
+  Enes100.println(Mission);  
+  // Enes100.println(GetUSReading(Forward)); 
+  // Enes100.println(GetUSReading(Left)); 
+  // Enes100.println(GetUSReading(Right));
+
+
   // Add code here to go through the parts of the mission (i.e. locate mission objective, measure data points, etc.)
   if (Mission == FullMission){
+    Enes100.println("Full Mission Start"); 
     mStartPosition = GetPosition();
     mArrangement = 0;
     Point target_position;
@@ -68,7 +76,7 @@ void PMC::RunMission(const MissionType Mission){
         mArrangement |= A;
       } else {
         mArrangement |= D;
-      }
+      } 
 
       // Go to the next position to get a reading
       GoToPosition(gPoints[PE]);
@@ -138,11 +146,14 @@ void PMC::RunMission(const MissionType Mission){
   } else if (Mission == DetectObstacles){
     // Drive forward until we see an obstacle within 20 cm
     Drive(0.75f, Forward);
-    WaitUntilSee(20.0f);
+    delay(1000);
+    TurnTo(DegToRad(90.0f));
+    // WaitUntilSee(20.0f);
     Stop();
     Enes100.println("Obstacle detected! Stopping movement.");
   } else if (Mission == Debug){
     // Add code here to test out different functions and movements
+    Enes100.println("Running Debugging mission"); 
     TurnTo(DegToRad(90.0f));
     delay(1000);
     TurnTo(DegToRad(0.0f));
@@ -195,18 +206,26 @@ void PMC::ReleaseWheels(const bool free, const unsigned int Wheels){
 void PMC::SetMotorSpeed(const unsigned int Motors, const float Speed){
 
   if (Motors & FrontRight){
+    Enes100.println("FR Motor: ");
+    Enes100.println(Speed); 
     FR.SetSpeed(Speed); 
   }
 
   if (Motors & FrontLeft){
+    Enes100.println("FL Motor: ");
+    Enes100.println(Speed); 
     FL.SetSpeed(Speed); 
   }
 
   if (Motors & RearRight){
+    Enes100.println("RR Motor: ");
+    Enes100.println(Speed); 
     RR.SetSpeed(Speed); 
   }
 
   if (Motors & RearLeft){
+    Enes100.println("RL Motor: ");
+    Enes100.println(Speed); 
     RL.SetSpeed(Speed); 
   }
 }
@@ -279,10 +298,17 @@ void PMC::TurnTo(float direction, unsigned int axis){
   while (direction < -1 * PI){
       direction += PI; 
   }
+
+  Enes100.println("Direction: "); 
+  Enes100.println(direction); 
+  Enes100.println("Axis: "); 
+  Enes100.println((float)axis);
   
   if (axis & Center){
+    Enes100.println("Turning about center");
     TurnAboutCenter(direction);
   } else if (axis & (Turn) && !(axis & Strafe)){
+    Enes100.println("Turning about strafe");
     TurnAboutCorner(direction, axis); 
   } else if (axis & Strafe && !(axis & Turn)){
     Enes100.println("Error: Trying to strafe in the turn function");
@@ -296,6 +322,10 @@ void PMC::TurnAboutCenter(const float Theta){
   constexpr float turn_speed = TURN_SPEED; 
 
   while (dir != 0){
+    Enes100.println("Right Speed: ");
+    Enes100.println((float)dir * turn_speed); 
+    Enes100.println("Left Speed: "); 
+    Enes100.println(-1.0f * (float)dir * turn_speed);
     SetMotorSpeed(FrontRight | RearRight, (float)dir * turn_speed);
     SetMotorSpeed(FrontLeft | RearLeft, -1.0f * (float)dir * turn_speed);
 

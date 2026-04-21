@@ -71,7 +71,7 @@ class PMC {
     /// Gets the Y-Coordinate as a position
     float GetY();
 
-  protected: 
+  public: 
     /// Motor list
     Motor FR{}, FL{}, RR{}, RL{}; 
 
