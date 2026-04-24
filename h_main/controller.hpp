@@ -38,7 +38,7 @@ class PMC {
     void SetMotorSpeed(unsigned int Motors, float Speed); 
 
     /// Goes to a specific point on a 2D plane (in the arena)
-    void GoToPosition(const Point& p, float ThetaBound = 0.0f, unsigned int US_Override = MD_None, float DistOverride = -1.0f);
+    void GoToPosition(const Point& p, float ThetaBound = 1.5f, unsigned int US_Override = MD_None, float DistOverride = -1.0f);
 
     /// Turn to a specific theta (in radians) on the given axis
     void TurnTo(float Theta, unsigned int Axis = Center | Turn);

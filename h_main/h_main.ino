@@ -24,63 +24,37 @@ void setup()
 
     controller = PMC(TEAM_NAME, TEAM_TYPE, TAG_NUMBER, ROOM_NUMBER, WiFi_TX, WiFi_RX);
 
-    delay(2500);
+    delay(5000);
 
-    if (Serial.available() > 0){
-        String command;
+    // RL FL FR RR
 
-        while (true){
-            command = Serial.readStringUntil('\n');
+    // controller.FR.SetSpeed(1.0f);
 
-            if (command == "run"){
-                break; 
-            } else if (command == "fr"){
-                Serial.println("Front Right");
-                controller.FR.SetSpeed(1.0f); 
-            } else if (command == "fl"){
-                Serial.println("Front Left");
-                controller.FL.SetSpeed(1.0f);
-            } else if (command == "rr"){
-                Serial.println("Rear Right");
-                controller.RR.SetSpeed(1.0f);
-            } else if (command == "rl"){
-                Serial.println("Rear Left"); 
-                controller.RL.SetSpeed(1.0f); 
-            } else if (command == "stop"){
-                controller.Stop();
-                Serial.println("Stop"); 
-            }
-        }
+    // delay(1500); 
 
-    }
+    // controller.Stop();
 
-    delay(2500); 
+    // controller.FL.SetSpeed(1.0f);
 
-    controller.FL.SetSpeed(1.0f); 
+    // delay(1500); 
 
-    delay(2500); 
+    // controller.Stop();
 
-    controller.Stop();
+    // controller.RR.SetSpeed(1.0f); 
 
-    controller.FR.SetSpeed(1.0f); 
+    // delay(1500); 
 
-    delay(2500); 
+    // controller.Stop(); 
 
-    controller.Stop(); 
+    // controller.RL.SetSpeed(1.0f); 
 
-    controller.RL.SetSpeed(1.0f); 
+    // delay(1500); 
 
-    delay(2500); 
-
-    controller.Stop(); 
-
-    controller.RR.SetSpeed(1.0f); 
-
-    delay(2500); 
-
-    controller.Stop(); 
+    // controller.Stop(); 
 
     controller.RunMission(FullMission);
+
+    // controller.RunMission(DriveForward);
 }
 
 void loop() {
