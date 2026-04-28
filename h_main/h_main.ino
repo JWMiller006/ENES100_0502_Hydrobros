@@ -54,7 +54,9 @@ void setup()
 
     controller.RunMission(FullMission);
 
-    // controller.RunMission(DriveForward);
+    // controller.RunMission(Debug);
+
+    // controller.RunMission(CalibrateMotors); 
 }
 
 void loop() {

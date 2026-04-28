@@ -3,6 +3,10 @@
 #include "us_ctl.hpp"
 #include "path.hpp"
 
+#ifndef DEBUG
+#define DEBUG true
+#endif 
+
 /// Primary Mission-Control
 class PMC {
   public: 
@@ -38,10 +42,10 @@ class PMC {
     void SetMotorSpeed(unsigned int Motors, float Speed); 
 
     /// Goes to a specific point on a 2D plane (in the arena)
-    void GoToPosition(const Point& p, float ThetaBound = 1.5f, unsigned int US_Override = MD_None, float DistOverride = -1.0f);
+    void GoToPosition(const Point& p, float ThetaBound = 0.05f, float AcceptableRange = 0.1f, unsigned int US_Override = MD_None, float DistOverride = -1.0f);
 
     /// Turn to a specific theta (in radians) on the given axis
-    void TurnTo(float Theta, unsigned int Axis = Center | Turn);
+    void TurnTo(float Theta, unsigned int Axis = Center | Turn, float theta_range = 0.015f);
 
     /// Set the motors to drive on the given axis (including strafing)
     void Drive(float Speed, unsigned int Axis = Forward);
@@ -79,7 +83,7 @@ class PMC {
     UltraSonicSensor ForwardUS{}, RightUS{}, LeftUS{}; 
 
     /// Helper function that turns the OTV around its center
-    void TurnAboutCenter(float Theta);
+    void TurnAboutCenter(float Theta, float theta_range);
 
     /// Helper function that turns the OTV about some other axis (or together different directions to make an axis)
     void TurnAboutCorner(float Theta, unsigned int Axis); 

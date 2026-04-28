@@ -57,7 +57,8 @@ enum MissionType : unsigned int {
   FullMission = 1,
   DriveForward = 2,
   DetectObstacles = 3,
-  Debug = 4
+  Debug = 4, 
+  CalibrateMotors = 5, 
 };
 
 /// 2D point on the arena
@@ -127,6 +128,8 @@ enum Position : unsigned short {
   L2 = 15,
   L3 = 16
 };
+
+constexpr float kOffsetX = -0.02f, kOffsetY = -0.05f; 
 
 
 

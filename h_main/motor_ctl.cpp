@@ -26,6 +26,9 @@ Motor::Motor(const MotorType TypeOfMotor, MotorPos Pos, const uint8_t EnablePin,
 
 /// Run specified motor at specified speed
 void Motor::SetSpeed(const float Speed){
+  const uint8_t NormSpeed = FloatToShort(Speed);
+  digitalWrite(mEnablePin, NormSpeed); 
+
   if (MotorKind == DC_Motor) {
     if (Speed > 0) { // aka go forward
       digitalWrite(mOutOnePin, LOW); 
@@ -34,11 +37,7 @@ void Motor::SetSpeed(const float Speed){
       digitalWrite(mOutOnePin, HIGH); 
       digitalWrite(mOutTwoPin, LOW); 
     }
-
-    const uint8_t NormSpeed = FloatToShort(Speed);
-    digitalWrite(mEnablePin, NormSpeed); 
-  }
-  
+  }  
 }
 
 Motor::~Motor(){

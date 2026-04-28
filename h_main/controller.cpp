@@ -12,6 +12,10 @@
 #define SIMULATOR false
 #endif
 
+constexpr unsigned short kPause = 3;
+constexpr float kThetaBound = 0.075f; 
+constexpr float kAcceptableDist = 0.25f;
+
 /// Default constructor
 PMC::PMC(){
   // Do nothing
@@ -67,9 +71,14 @@ void PMC::RunMission(const MissionType Mission){
 
     // Assuming that we are within acceptable x-coordinate range (normal starting range)
     if (mStartPosition.y > 1.0f) {
+
+      #if DEBUG
+      Enes100.println("Starting on the top of the arena (by y coordinate)");
+      #endif 
+
       target_position = gPoints[PA];
       mArrangement |= Inverse;
-      TurnTo(DegToRad(-90.0f));
+      TurnTo(DegToRad(-90.0f), kThetaBound);
 
       // Get initial reading
       if (const float obstacle_one = GetUSReading(Left); obstacle_one < 1.5f) {
@@ -88,6 +97,11 @@ void PMC::RunMission(const MissionType Mission){
         mArrangement |= E;
       }
     } else {
+
+      #if DEBUG
+      Enes100.println("Starting on the bottom of the arena (by y coordinate)");
+      #endif 
+
       target_position = gPoints[PB];
       TurnTo(DegToRad(90.0f));
 
@@ -97,8 +111,6 @@ void PMC::RunMission(const MissionType Mission){
       } else {
         mArrangement |= F;
       }
-
-      Enes100.println("In Proper spot"); 
 
       // Go to the next position to get a reading
       GoToPosition(gPoints[PE]);
@@ -119,17 +131,8 @@ void PMC::RunMission(const MissionType Mission){
       Stop(); 
     }
 
-    // Update current position
-    auto current_position = GetPosition();
-
-    // line up the x-coordinate
-    GoToPosition({target_position.x, current_position.y});
-
-    // Update current position again
-    current_position = GetPosition();
-
-    // line up the y-coordinate
-    GoToPosition({current_position.x, target_position.y}, Forward, 5.0f);
+    // Goes to the target position
+    GoToPosition(target_position, kThetaBound, kAcceptableDist); 
 
     // From here, complete logic for completing the mission task. While it is doing that,
     //    we can also be choosing a path to complete the navigation part of the mission
@@ -147,7 +150,7 @@ void PMC::RunMission(const MissionType Mission){
 
     delay(100000); 
 
-    FollowPath(mPath, Forward, 0.05f);
+    FollowPath(mPath, Forward, kThetaBound);
 
     MarkCompleteMission();
 
@@ -159,18 +162,31 @@ void PMC::RunMission(const MissionType Mission){
     // Drive forward until we see an obstacle within 20 cm
     Drive(0.75f, Forward);
     delay(1000);
-    TurnTo(DegToRad(90.0f));
+    TurnTo(DegToRad(90.0f), Center | Turn, kThetaBound);
     // WaitUntilSee(20.0f);
     Stop();
     Enes100.println("Obstacle detected! Stopping movement.");
+  } else if (Mission == CalibrateMotors){
+    float motorSpeed = 0.0f; 
+
+    while (true) {
+      Drive(motorSpeed); 
+
+      delay(5); 
+
+      motorSpeed += 0.01f; 
+
+      if (motorSpeed > 1.0f) {
+        motorSpeed = 0.0f; 
+      }
+    }
   } else if (Mission == Debug){
     // Add code here to test out different functions and movements
     Enes100.println("Running Debugging mission"); 
-    TurnTo(DegToRad(90.0f));
-    delay(1000);
-    TurnTo(DegToRad(0.0f));
-    delay(1000);
     delay(100); 
+    GoToPosition(gPoints[PG]); 
+    Stop(); 
+
   } else
   {
     Enes100.println("Error: Invalid Mission Type!");
@@ -216,7 +232,6 @@ void PMC::ReleaseWheels(const bool free, const unsigned int Wheels){
 }
 
 void PMC::SetMotorSpeed(const unsigned int Motors, const float Speed){
-
   if (Motors & FrontRight){
     FR.SetSpeed(Speed); 
   }
@@ -234,13 +249,27 @@ void PMC::SetMotorSpeed(const unsigned int Motors, const float Speed){
   }
 }
 
-void PMC::GoToPosition(const Point& p, float ThetaBound, unsigned int US_Override, float DistOverride){
+void PMC::GoToPosition(const Point& p, float ThetaBound, float AcceptableRange, unsigned int US_Override, float DistOverride){
   Point current_position = GetPosition();
+  float curr_theta = GetTheta(); 
   float target_theta = atan2(p.y - current_position.y, p.x - current_position.x);
 
-  if (target_theta > 0.1f) {
-    TurnTo(target_theta, Center | Turn);
+  #if DEBUG
+  Enes100.print("Heading to theta: ");
+  Enes100.println(target_theta);
+  #endif 
+
+  if (fabs(target_theta - curr_theta) > 0.05f) {
+    TurnTo(target_theta, Center | Turn, ThetaBound);
   }
+
+  #if DEBUG
+  Enes100.print("Heading to position: (");
+  Enes100.print(p.x); 
+  Enes100.print(", ");
+  Enes100.print(p.y); 
+  Enes100.println(")"); 
+  #endif 
 
   Drive(GLOBAL_DRIVE_SPEED, Forward);
   float prev_distance = distance(current_position, p);
@@ -248,19 +277,34 @@ void PMC::GoToPosition(const Point& p, float ThetaBound, unsigned int US_Overrid
   while (curr_distance > 0.1f){
     current_position = GetPosition();
 
-    if (ThetaBound > 0.1f){
-      if (const float curr_theta = GetTheta(); curr_theta - target_theta > ThetaBound || curr_theta - target_theta < -1.0f * ThetaBound) {
+    if (ThetaBound > 0.01f){
+      if (const float curr_theta = GetTheta(); (fabs(curr_theta - target_theta) > ThetaBound)) {
         Stop();
         target_theta = atan2(p.y - current_position.y, p.x - current_position.x);
-        TurnTo(target_theta, Center | Turn);
+        Enes100.print("New Target Needed [line 260]: ");
+        Enes100.println(target_theta); 
+        delay(kPause); 
+        TurnTo(target_theta, Center | Turn, ThetaBound);
         Drive(GLOBAL_DRIVE_SPEED, Forward);
       }
     }
 
-    if (prev_distance - 0.25f < curr_distance) {
+    if (prev_distance + AcceptableRange < curr_distance) {
       if (const float temp_theta = atan2(p.y - current_position.y, p.x - current_position.x); temp_theta > 0.01f) {
         Stop();
-        TurnTo(temp_theta, Center | Turn);
+        #if DEBUG
+        Enes100.print("Got farther than anticipated: Current Distance: ");
+        Enes100.print(curr_distance); 
+        Enes100.print("; Previous Distance: "); 
+        Enes100.println(prev_distance); 
+        #endif 
+        delay(kPause); 
+        TurnTo(temp_theta, Center | Turn, ThetaBound);
+        Stop(); 
+        #if DEBUG
+        Enes100.println("Reoriented"); 
+        #endif 
+        delay(kPause); 
         Drive(GLOBAL_DRIVE_SPEED, Forward);
       }
     }
@@ -268,7 +312,7 @@ void PMC::GoToPosition(const Point& p, float ThetaBound, unsigned int US_Overrid
     prev_distance = curr_distance;
     curr_distance = distance(current_position, p);
     Drive(GLOBAL_DRIVE_SPEED, Forward); 
-    delay(1);
+    delay(kPause);
     Stop(); 
 
     if (US_Override != MD_None){
@@ -281,6 +325,14 @@ void PMC::GoToPosition(const Point& p, float ThetaBound, unsigned int US_Overrid
   }
 
   Stop();
+
+  #if DEBUG
+  Enes100.print("Arrived at target position: ( "); 
+  Enes100.print(p.x);
+  Enes100.print(", ");
+  Enes100.print(p.y);
+  Enes100.println(")"); 
+  #endif 
 }
 
 /// Get the direction that we need to turn in order to get to the specified theta
@@ -297,7 +349,7 @@ int GetDirTheta(const float target_theta, const float range = 0.025f){
     return dir; 
 }
 
-void PMC::TurnTo(float direction, unsigned int axis){
+void PMC::TurnTo(float direction, unsigned int axis, float theta_range){
   while (direction > PI){
       direction -= PI; 
   }
@@ -313,7 +365,7 @@ void PMC::TurnTo(float direction, unsigned int axis){
   
   if (axis & Center){
     Enes100.println("Turning about center");
-    TurnAboutCenter(direction);
+    TurnAboutCenter(direction, theta_range);
   } else if (axis & (Turn) && !(axis & Strafe)){
     Enes100.println("Turning about strafe");
     TurnAboutCorner(direction, axis); 
@@ -322,8 +374,8 @@ void PMC::TurnTo(float direction, unsigned int axis){
   }
 }
 
-void PMC::TurnAboutCenter(const float Theta){
-  int dir = GetDirTheta(Theta);
+void PMC::TurnAboutCenter(const float Theta, const float theta_range){
+  int dir = GetDirTheta(Theta, theta_range);
 
   // Turn at the given rate (between 0 and 1)
   constexpr float turn_speed = TURN_SPEED; 
@@ -333,13 +385,17 @@ void PMC::TurnAboutCenter(const float Theta){
     SetMotorSpeed(FrontLeft | RearLeft, -1.0f * (float)dir * turn_speed);
 
     delay(5); 
-    Stop(); 
+    Stop();
+    delay(5); 
 
-    dir = GetDirTheta(Theta);
+    dir = GetDirTheta(Theta, theta_range);
   }
 
   Stop(); 
+
+  #if DEBUG
   Enes100.println("Arrived at angle"); 
+  #endif 
 }
 
 void PMC::TurnAboutCorner(const float Theta, unsigned int Axis){
@@ -445,7 +501,7 @@ void PMC::WaitUntilSee(float Distance, unsigned int Direction)
 void PMC::FollowPath(Path &path, unsigned int US_Override, float DistOverride) {
   while (!path.empty()) {
     const Point next_point = path.GetNextPoint();
-    GoToPosition(next_point, 0.05f, US_Override, DistOverride);
+    GoToPosition(next_point, kThetaBound, kAcceptableDist, US_Override, DistOverride);
   }
 }
 
@@ -469,11 +525,18 @@ float PMC::GetTheta(){
 
 Point PMC::GetPosition()
 {
-  return {GetX(), GetY()};
+  const float iX = GetX(), iY = GetY(), theta = GetTheta(); 
+  const float s = sin(theta); 
+  const float c = cos(theta); 
+  const float fX = iX + kOffsetX * c - kOffsetY * s; 
+  const float fY = iY + kOffsetX * s + kOffsetY * s;   
+
+  return {fX, fY};
 }
 
 float PMC::GetX()
 {
+  // const float Theta = GetTheta(); 
   return Enes100.getX();
 }
 
