@@ -15,7 +15,19 @@ enum class Color {
   Default,
 };
 
+struct ColorCountStruct {
+  Color color;
+  unsigned short count;
+  ColorCountStruct(Color col, unsigned short cnt){
+    color = col; 
+    count = cnt; 
+  }
+};
+
+extern ColorCountStruct gColorCount[9];
+
 String operator*(Color); 
+Color max_count(Color[50]); 
 
 enum CS_Calibration : unsigned short {
   Uncalibrated = 0, 

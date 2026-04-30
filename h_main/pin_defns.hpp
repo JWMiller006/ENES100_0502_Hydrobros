@@ -30,18 +30,26 @@
 #define LEFT_US_TRIGGER 19
 #define LEFT_US_ECHO 18
 
-#define LEDRGB_PIN_DIN 20
+// #define LEDRGB_PIN_DIN 20
 #define WiFi_TX 50 //50
 #define WiFi_RX 51
-#define STEPPER_STEP 23
-#define STEPPER_DIR 22
+// #define STEPPER_STEP 23
+// #define STEPPER_DIR 22
 
 #define SERVO_PIN 36
 
 #define VOLTAGE_PIN A0
+#define RESTART_CODE_PIN 22
 
 #define CS_S1 29
 #define CS_S0 28
 #define CS_S3 31
 #define CS_S2 30
 #define CS_OUT 27
+
+/// Must be an interupt pin (2, 3, 18, 19, 20, 21)
+#define BUTTON_RESET_WHITE_POINT 20
+#define BUTTON_RESET_BLACK_POINT 21
+
+
+

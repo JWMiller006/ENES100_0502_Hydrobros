@@ -1,6 +1,10 @@
 #include "color_sensor.hpp"
 #include <Arduino.h>
 
+ColorCountStruct gColorCount[9] = {{Color::Black, 0}, {Color::Blue, 0}, {Color::Default, 0}, 
+                                    {Color::Gray, 0}, {Color::Green, 0}, {Color::NotInit, 0}, 
+                                    {Color::Red, 0}, {Color::White, 0}, {Color::Yellow, 0}}; 
+
 vec3::vec3(){
   r = g = b = 0; 
 }
@@ -34,6 +38,66 @@ String operator*(Color inColor){
     default: 
       return "Not Mapped Yet"; 
   }
+}
+
+int compareCounts(const void *a, const void *b){
+  ColorCountStruct *ptrA = (ColorCountStruct *)a;
+  ColorCountStruct *ptrB = (ColorCountStruct *)b;
+
+  // For descending order (highest count first):
+  return (ptrB->count - ptrA->count);
+}
+
+Color max_count(Color colors[50]){
+  unsigned short black = 0, blue = 0, _default = 0, gray = 0, green = 0, ni = 0, red = 0, white = 0, yellow = 0; 
+  for (int i = 0; i < 50; i++){
+    const Color inColor = colors[i]; 
+    switch (inColor){
+      case Color::Black:
+        black++;
+        break; 
+      case Color::Blue:
+        blue++;
+        break; 
+      case Color::Default:
+        _default++; 
+        break; 
+      case Color::Gray: 
+        gray++; 
+        break; 
+      case Color::Green: 
+        green++;
+        break; 
+      case Color::NotInit: 
+        ni++;
+        break; 
+      case Color::Red: 
+        red++; 
+        break; 
+      case Color::White: 
+        white++; 
+        break; 
+      case Color::Yellow: 
+        yellow++; 
+        break; 
+      default: 
+        break; 
+    }
+  }
+
+  gColorCount[0] = {Color::Black, black};
+  gColorCount[1] = {Color::Blue, blue};
+  gColorCount[2] = {Color::Default, _default};
+  gColorCount[3] = {Color::Gray, gray};
+  gColorCount[4] = {Color::Green, green};
+  gColorCount[5] = {Color::NotInit, ni};
+  gColorCount[6] = {Color::Red, red};
+  gColorCount[7] = {Color::White, white};
+  gColorCount[8] = {Color::Yellow, yellow};
+
+  qsort(gColorCount, 9, sizeof(ColorCountStruct), compareCounts); 
+
+  return gColorCount[0].color;
 }
 
 ColorSensor::ColorSensor(unsigned short S0, unsigned short S1, unsigned short S2, unsigned short S3, unsigned short OutPin){

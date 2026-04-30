@@ -13,6 +13,8 @@ constexpr unsigned short kPause = 3;
 constexpr float kThetaBound = 0.075f; // 0.015f 
 constexpr float kAcceptableDist = 0.25f;
 
+extern ColorSensor* sColor;
+
 /// Primary Mission-Control
 class PMC {
   public: 
@@ -36,6 +38,7 @@ class PMC {
     ///   Special mission alignment
     void CompleteTasking(); 
 
+    /// Send the complete signal
     void MarkCompleteMission();
 
     /*********************************************************/
@@ -73,6 +76,12 @@ class PMC {
     /// Get the distance reading from the given direction
     float GetUSReading(unsigned int Direction); 
 
+    /// Calibrates the white-point for the color sensor
+    static void CalibrateWhitePoint(); 
+
+    /// Calibrates the black-point for the color sensor
+    static void CalibrateBlackPoint(); 
+
     /// Get the theta from the vision system
     float GetTheta();
 
@@ -89,7 +98,11 @@ class PMC {
     /// Motor list
     Motor FR{}, FL{}, RR{}, RL{}; 
 
+    /// Servo Motor Handle
     ServoMotor mServ{}; 
+
+    /// Color sensor handle
+    ColorSensor mColor{};
 
     /// Ultrasonic sensors
     UltraSonicSensor ForwardUS{}, RightUS{}, LeftUS{}; 

@@ -8,6 +8,9 @@
 #ifndef USE_OFFSET
 #define USE_OFFSET false
 #endif 
+#ifndef USE_START_PIN
+#define USE_START_PIN true
+#endif 
 
 // #include <Enes100.h>
 #include "helpers.hpp"
@@ -29,7 +32,13 @@ PMC controller;
 void setup()
 {
 
-    controller = PMC(TEAM_NAME, TEAM_TYPE, TAG_NUMBER, ROOM_NUMBER, WiFi_TX, WiFi_RX);
+    controller = PMC(TEAM_NAME, TEAM_TYPE, TAG_NUMBER, ROOM_NUMBER, WiFi_TX, WiFi_RX); // TODO: Wire up start button to pin 22 and a ground
+    
+    // Setup interupts for calibration
+    pinMode(BUTTON_RESET_WHITE_POINT, INPUT_PULLUP); 
+    pinMode(BUTTON_RESET_BLACK_POINT, INPUT_PULLUP); 
+    attachInterrupt(digitalPinToInterrupt(BUTTON_RESET_WHITE_POINT), PMC::CalibrateWhitePoint, CHANGE); // TODO: Wire up buttons to this and a ground
+    attachInterrupt(digitalPinToInterrupt(BUTTON_RESET_BLACK_POINT), PMC::CalibrateBlackPoint, CHANGE); // TODO: Wire up buttons to this and a ground
 
     // RL FL FR RR
 
@@ -69,7 +78,17 @@ void setup()
 }
 
 void loop() {
+    #if USE_START_PIN
+    while(digitalRead(RESTART_CODE_PIN) != LOW){
+      delay(50);
+      __asm__ __volatile__ ("nop");
+    }
+
+    delay(1000); 
+
+    controller.RunMission(FullMission); 
+    #else
     delay(10000); 
-    
+    #endif 
 }
 

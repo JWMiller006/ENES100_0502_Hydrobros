@@ -14,6 +14,8 @@
 #define SIMULATOR false
 #endif
 
+ColorSensor* sColor = nullptr; 
+
 /// Default constructor
 PMC::PMC(){
   // Do nothing
@@ -41,15 +43,21 @@ void PMC::Init(const char* Name, const int MissionType, const int MarkerID, cons
   RR = Motor(DC_Motor, RearRight, REAR_RIGHT_MOTOR_ENABLE, REAR_RIGHT_MOTOR_DRIVER_1, REAR_RIGHT_MOTOR_DRIVER_2);
   RL = Motor(DC_Motor, RearLeft, REAR_LEFT_MOTOR_ENABLE, REAR_LEFT_MOTOR_DRIVER_1, REAR_LEFT_MOTOR_DRIVER_2);
 
+  // Setup servo motor
   mServ = ServoMotor(SERVO_PIN); 
+
+  // Setup Color Sensor 
+  mColor = ColorSensor(CS_S0, CS_S1, CS_S2, CS_S3, CS_OUT); 
+  sColor = &mColor; 
 
   // Setup US Sensors
   ForwardUS = UltraSonicSensor(FORWARD_US_TRIGGER, FORWARD_US_ECHO); 
   RightUS = UltraSonicSensor(RIGHT_US_TRIGGER, RIGHT_US_ECHO); 
   LeftUS = UltraSonicSensor(LEFT_US_TRIGGER, LEFT_US_ECHO);
 
-  // Setup CS Sensor
-  // TODO: Port CS Sensor code from Sampurna
+  #if USE_START_PIN
+  pinMode(RESTART_CODE_PIN, INPUT_PULLUP); 
+  #endif
 
   bInitialized = true; 
 }
@@ -64,6 +72,15 @@ void PMC::RunMission(const MissionType Mission){
 
   // Add code here to go through the parts of the mission (i.e. locate mission objective, measure data points, etc.)
   if (Mission == FullMission){
+    #if USE_START_PIN
+    Enes100.println("Full Mission Initialized, waiting for user to authorize mission start"); 
+
+    while(digitalRead(RESTART_CODE_PIN) != LOW){
+      delay(50);
+      __asm__ __volatile__ ("nop");
+    }
+    #endif 
+  
     Enes100.println("Full Mission Start"); 
     mServ.ResetServo();
 
@@ -326,12 +343,20 @@ void PMC::RunMission(const MissionType Mission){
 
 void PMC::CompleteTasking(){
   // Align with mission
+  Enes100.println("Aligning with mission"); 
   if (mArrangement & Inverse){
     // Align with the bottom side
-    TurnTo(DegToRad(-90.0f), Center | Turn, DegToRad(1.0f));
+    TurnTo(DegToRad(-90.0f), Center | Turn, DegToRad(1.0f), 1);
+    GoToPosition(gPoints[PD], DegToRad(1.0f), 0.01f, MD_None, -1.0f); 
+    TurnTo(DegToRad(-90.0f), Center | Turn, DegToRad(1.0f), 1);
   } else {
     // Align with the top side
+    TurnTo(DegToRad(90.0f), Center | Turn, DegToRad(1.0f), 1);
+    GoToPosition(gPoints[PC], DegToRad(1.0f), 0.01f, MD_None, -1.0f);
+    TurnTo(DegToRad(90.0f), Center | Turn, DegToRad(1.0f), 1);
   }
+
+  Enes100.println("Aligned with mission, prepping drop"); 
 
   mServ.RotateTo(110); // Drops balls and prepares for reading
 
@@ -351,6 +376,49 @@ void PMC::CompleteTasking(){
   delay(2500); 
 
   mServ.ResetServo(); // Reset to be able to fall cleanly
+
+  delay(1500); 
+
+  Drive(GLOBAL_DRIVE_SPEED, Forward); 
+
+  WaitUntilSee(0.0f, Forward); 
+
+  Stop(); 
+
+  // Now to read the colors, solution: Strafe backand forward to find the most prevalent color
+
+  Drive(GLOBAL_DRIVE_SPEED, Left | Strafe); 
+  delay(20); 
+  Stop(); 
+
+  Color cList[50];
+  unsigned int Dir = Right; 
+
+  for (int i = 0; i < 5; i++){
+    Drive(GLOBAL_DRIVE_SPEED, Dir | Strafe); 
+    
+    for (int j = 0; j < 10; j++){
+      cList[(i * 10 + j)] = mColor.GetColor();
+    }
+
+    Stop(); 
+
+    if (Dir & Right){
+      Dir = Left; 
+    } else {
+      Dir = Right; 
+    }
+
+    delay(250); 
+  }
+
+  Enes100.print("Current Color: "); 
+  Enes100.println(*mColor.GetColor());
+
+  for (int i = 0; i < 9; i++){
+    String output = "Number " + String(i+1) + " most observed color: " + *(gColorCount[i].color) + "; " + String(gColorCount[i].count) + " times";
+    Enes100.println(output); 
+  }
 }
 
 void PMC::MarkCompleteMission() {
@@ -675,6 +743,50 @@ float PMC::GetUSReading(const unsigned int Direction){
   } else {
     return -1.0f; 
   }
+}
+
+void PMC::CalibrateWhitePoint(){
+  if (!sColor){
+    Enes100.println("Attempted to calibrate white point without proper reference"); 
+    return; 
+  }
+
+  constexpr int CountDownMax = 5; 
+
+  for (int i = 0; i <= CountDownMax; i++){
+    Enes100.print(CountDownMax - i); 
+    Enes100.println(" seconds remaining");
+    delay(1000); 
+  }
+
+  Enes100.println("Calibration has begun"); 
+
+  sColor->Calibrate(CS_Calibration::WhitePoint); 
+
+  Enes100.println("Calibrated white point"); 
+  return; 
+}
+
+void PMC::CalibrateBlackPoint(){
+  if (!sColor){
+    Enes100.println("Attempted to calibrate black point without proper reference"); 
+    return; 
+  }
+
+  constexpr int CountDownMax = 5; 
+
+  for (int i = 0; i <= CountDownMax; i++){
+    Enes100.print(CountDownMax - i); 
+    Enes100.println(" seconds remaining");
+    delay(1000); 
+  }
+
+  Enes100.println("Calibration has begun"); 
+
+  sColor->Calibrate(CS_Calibration::BlackPoint); 
+
+  Enes100.println("Calibrated black point"); 
+  return; 
 }
 
 float PMC::GetTheta(){
