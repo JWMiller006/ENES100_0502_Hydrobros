@@ -2,6 +2,7 @@
 #include <Enes100.h>
 #include <math.h>
 #include "controller.hpp"
+#include "servo.hpp"
 #include "pin_defns.hpp"
 #include "motor_ctl.hpp"
 #include "helpers.hpp"
@@ -43,6 +44,8 @@ void PMC::Init(const char* Name, const int MissionType, const int MarkerID, cons
   RR = Motor(DC_Motor, RearRight, REAR_RIGHT_MOTOR_ENABLE, REAR_RIGHT_MOTOR_DRIVER_1, REAR_RIGHT_MOTOR_DRIVER_2);
   RL = Motor(DC_Motor, RearLeft, REAR_LEFT_MOTOR_ENABLE, REAR_LEFT_MOTOR_DRIVER_1, REAR_LEFT_MOTOR_DRIVER_2);
 
+  mServ = ServoMotor(SERVO_PIN); 
+
   // Setup US Sensors
   ForwardUS = UltraSonicSensor(FORWARD_US_TRIGGER, FORWARD_US_ECHO); 
   RightUS = UltraSonicSensor(RIGHT_US_TRIGGER, RIGHT_US_ECHO); 
@@ -65,6 +68,14 @@ void PMC::RunMission(const MissionType Mission){
   // Add code here to go through the parts of the mission (i.e. locate mission objective, measure data points, etc.)
   if (Mission == FullMission){
     Enes100.println("Full Mission Start"); 
+    mServ.ResetServo();
+
+    for (int i = 0; i < 10; i++){
+      delay(1000);
+      Enes100.print(10 - i); 
+      Enes100.println(" seconds remaining"); 
+    }
+
     mStartPosition = GetPosition();
     mArrangement = 0;
     Point target_position;
@@ -89,13 +100,26 @@ void PMC::RunMission(const MissionType Mission){
 
       // Go to the next position to get a reading
       GoToPosition(gPoints[PE]);
+      TurnTo(DegToRad(-90.0f)); 
 
       // Get US Reading on left side
-      if (const float obstacle_two = GetUSReading(Left); obstacle_two < 1.5f) {
+
+      const float obstacle_two = GetUSReading(Left);
+      Enes100.print("Obstacle 2 reading: ");
+      Enes100.println(obstacle_two); 
+
+      if (obstacle_two < 1.5f) {
         mArrangement |= B;
       } else {
         mArrangement |= E;
       }
+
+      GoToPosition(gPoints[PD]);
+      TurnTo(DegToRad(-90.0f)); 
+      Stop(); 
+
+      Enes100.println("Arrived and ready for mission");
+
     } else {
 
       #if DEBUG
@@ -105,8 +129,12 @@ void PMC::RunMission(const MissionType Mission){
       target_position = gPoints[PB];
       TurnTo(DegToRad(90.0f));
 
+      const float obstacle_one = GetUSReading(Right);
+      Enes100.print(obstacle_one); 
+      Enes100.println(" cm to obstacle one"); 
+
       // Get initial reading
-      if (const float obstacle_one = GetUSReading(Right); obstacle_one < 1.5f) {
+      if (obstacle_one < 1.5f) {
         mArrangement |= C;
       } else {
         mArrangement |= F;
@@ -115,28 +143,67 @@ void PMC::RunMission(const MissionType Mission){
       // Go to the next position to get a reading
       GoToPosition(gPoints[PE]);
 
+      Enes100.println("Arrived at point E; Aligning for US reading"); 
+
+      TurnTo(DegToRad(90.0f), DegToRad(3.0f)); 
+
       Stop(); 
 
       delay(2500); 
 
+      const float obstacle_two = GetUSReading(Right); 
+      Enes100.print(obstacle_two); 
+      Enes100.println(" cm to obstacle two"); 
+
       // Get US Reading on right side
-      if (const float obstacle_two = GetUSReading(Right); obstacle_two < 1.5f) {
+      if (obstacle_two < 1.5f && obstacle_two > 0.0f) {
         mArrangement |= B;
       } else {
         mArrangement |= E;
       }
 
-      GoToPosition(gPoints[PD]); 
+      GoToPosition(gPoints[PC]); 
 
       Stop(); 
+
+      Enes100.println("Ready to complete mission"); 
     }
 
     // Goes to the target position
-    GoToPosition(target_position, kThetaBound, kAcceptableDist); 
+    // GoToPosition(target_position, kThetaBound, kAcceptableDist, Forward, 3.0f); 
 
     // From here, complete logic for completing the mission task. While it is doing that,
     //    we can also be choosing a path to complete the navigation part of the mission
     Enes100.println("TODO: Add mission specific tasking");
+
+    mServ.RotateTo(110); 
+
+    delay(2500); 
+
+    float avg = 0; 
+
+    for (int i = 0; i < 100; i++){
+      const int reading = mServ.GetReading();
+
+      if (avg == 0.0f){
+        avg = (float)reading;
+      } else {
+        avg += reading; 
+        avg /= 2.0f; 
+      }
+
+      Enes100.print("Voltage Reading: ");
+      Enes100.println(reading); 
+
+      delay(50); 
+    }
+
+    Serial.println("Average: ");
+    Serial.println(avg); 
+
+    delay(2500); 
+
+    mServ.ResetServo();
 
     // Now that we have completed the task, we can follow the path to the end of the arena
     mPath = SelectPath(mArrangement);
@@ -170,7 +237,7 @@ void PMC::RunMission(const MissionType Mission){
     float motorSpeed = 0.0f; 
 
     while (true) {
-      Drive(motorSpeed); 
+      Drive(-1.0f * motorSpeed); 
 
       delay(5); 
 
@@ -180,6 +247,57 @@ void PMC::RunMission(const MissionType Mission){
         motorSpeed = 0.0f; 
       }
     }
+  } else if (Mission == CalibrateUS) {
+    while (true) {
+      Enes100.print("Left US Reading "); 
+      Enes100.print(LeftUS.GetDistance());
+      Enes100.println(" cm");
+      Enes100.print("Right US Reading ");
+      Enes100.print(RightUS.GetDistance()); 
+      Enes100.println(" cm");
+      Enes100.print("Forward US Reading "); 
+      Enes100.print(ForwardUS.GetDistance()); 
+      Enes100.println(" cm");
+      
+      delay(1000); 
+    }
+  } else if (Mission == CalibrateServo){
+    
+    mServ.ResetServo();
+
+    delay(2500);
+
+    mServ.RotateTo(110); 
+
+    // delay(2500); 
+
+    // float avg = 0; 
+
+    // for (int i = 0; i < 100; i++){
+    //   const int reading = mServ.GetReading();
+
+    //   if (avg == 0.0f){
+    //     avg = (float)reading;
+    //   } else {
+    //     avg += reading; 
+    //     avg /= 2.0f; 
+    //   }
+
+    //   Enes100.print("Voltage Reading: ");
+    //   Enes100.println(reading); 
+
+    //   delay(50); 
+    // }
+
+    // Serial.println("Average: ");
+    // Serial.println(avg); 
+
+    delay(2500); 
+
+    mServ.ResetServo();
+
+    mServ.ResetServo();
+
   } else if (Mission == Debug){
     // Add code here to test out different functions and movements
     Enes100.println("Running Debugging mission"); 

@@ -59,6 +59,8 @@ enum MissionType : unsigned int {
   DetectObstacles = 3,
   Debug = 4, 
   CalibrateMotors = 5, 
+  CalibrateUS = 6,
+  CalibrateServo = 7, 
 };
 
 /// 2D point on the arena
@@ -92,7 +94,7 @@ struct Point {
 static Point gPoints[] = {
   {0.22f, 0.45f},     // A
   {0.22f, 1.59f},     // B
-  {0.20f, 1.28f},     // C
+  {0.20f, 1.28f},     // C 1.046
   {0.22f, 0.75f},     // D
   {0.22f, 1.00f},     // E
   {3.95f, 1.57f},     // F
@@ -129,7 +131,7 @@ enum Position : unsigned short {
   L3 = 16
 };
 
-constexpr float kOffsetX = -0.02f, kOffsetY = -0.05f; 
+constexpr float kOffsetX = 0.00f, kOffsetY = -0.24f; 
 
 
 

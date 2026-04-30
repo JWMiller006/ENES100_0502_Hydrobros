@@ -1,4 +1,7 @@
 #pragma once
+
+#include <Arduino.h>
+
 #define ROOM_NUMBER 1116 // 1116 1201
 #define TAG_NUMBER 499
 #define TEAM_TYPE 6  // From Enes100.h defns for hydrogen
@@ -26,12 +29,17 @@
 #define RIGHT_US_ECHO 16
 #define LEFT_US_TRIGGER 19
 #define LEFT_US_ECHO 18
+
 #define LEDRGB_PIN_DIN 20
 #define WiFi_TX 50 //50
 #define WiFi_RX 51
 #define STEPPER_STEP 23
 #define STEPPER_DIR 22
-#define SERVO_PIN 24
+
+#define SERVO_PIN 36
+
+#define VOLTAGE_PIN A0
+
 #define CS_S1 29
 #define CS_S0 28
 #define CS_S3 31

@@ -24,8 +24,6 @@ void setup()
 
     controller = PMC(TEAM_NAME, TEAM_TYPE, TAG_NUMBER, ROOM_NUMBER, WiFi_TX, WiFi_RX);
 
-    delay(5000);
-
     // RL FL FR RR
 
     // controller.FR.SetSpeed(1.0f);
@@ -57,6 +55,10 @@ void setup()
     // controller.RunMission(Debug);
 
     // controller.RunMission(CalibrateMotors); 
+
+    // controller.RunMission(CalibrateUS); 
+
+    // controller.RunMission(CalibrateServo); 
 }
 
 void loop() {

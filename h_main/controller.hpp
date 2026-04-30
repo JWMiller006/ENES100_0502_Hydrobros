@@ -2,6 +2,7 @@
 #include "motor_ctl.hpp"
 #include "us_ctl.hpp"
 #include "path.hpp"
+#include "servo.hpp"
 
 #ifndef DEBUG
 #define DEBUG true
@@ -78,6 +79,8 @@ class PMC {
   public: 
     /// Motor list
     Motor FR{}, FL{}, RR{}, RL{}; 
+
+    ServoMotor mServ{}; 
 
     /// Ultrasonic sensors
     UltraSonicSensor ForwardUS{}, RightUS{}, LeftUS{}; 
