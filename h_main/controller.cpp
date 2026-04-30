@@ -8,14 +8,11 @@
 #include "helpers.hpp"
 #include "types.hpp"
 #include "us_ctl.hpp"
+#include "color_sensor.hpp"
 
 #ifndef SIMULATOR
 #define SIMULATOR false
 #endif
-
-constexpr unsigned short kPause = 3;
-constexpr float kThetaBound = 0.075f; 
-constexpr float kAcceptableDist = 0.25f;
 
 /// Default constructor
 PMC::PMC(){
@@ -70,10 +67,53 @@ void PMC::RunMission(const MissionType Mission){
     Enes100.println("Full Mission Start"); 
     mServ.ResetServo();
 
-    for (int i = 0; i < 10; i++){
-      delay(1000);
-      Enes100.print(10 - i); 
+    constexpr int CountDownMax = 10; 
+    unsigned long prevTime = millis(); 
+    unsigned long totalInterval = 1000;
+    unsigned long nextTime; 
+
+    for (int i = 0; i <= CountDownMax; i++){
+      nextTime = prevTime + totalInterval; 
+      Enes100.print(CountDownMax - i); 
       Enes100.println(" seconds remaining"); 
+      
+      // Complete startup operations
+      switch (i){
+        case  0:
+          // Check Right US sensor
+          Enes100.print("Checking right US Sensor; Distance: ");
+          Enes100.print(RightUS.GetDistance());
+          Enes100.println(" cm"); 
+          break;
+        case  1:
+          // Check Front US sensor
+          Enes100.print("Checking front US Sensor; Distance: ");
+          Enes100.print(ForwardUS.GetDistance());
+          Enes100.println(" cm"); 
+          break;
+        case  2:
+          // Check Left US sensor
+          Enes100.print("Checking left US Sensor; Distance: ");
+          Enes100.print(LeftUS.GetDistance());
+          Enes100.println(" cm"); 
+          break;
+        case  3:
+        case  4:
+        case  5:
+        case  6:
+        case  7:
+        case  8:
+        case  9:
+        case 10:
+        default:
+          break;
+      }
+
+      while (millis() < nextTime){
+        __asm__ __volatile__ ("nop");
+      }
+
+      prevTime = millis(); 
     }
 
     mStartPosition = GetPosition();
@@ -89,7 +129,7 @@ void PMC::RunMission(const MissionType Mission){
 
       target_position = gPoints[PA];
       mArrangement |= Inverse;
-      TurnTo(DegToRad(-90.0f), kThetaBound);
+      TurnTo(DegToRad(-90.0f));
 
       // Get initial reading
       if (const float obstacle_one = GetUSReading(Left); obstacle_one < 1.5f) {
@@ -176,34 +216,7 @@ void PMC::RunMission(const MissionType Mission){
     //    we can also be choosing a path to complete the navigation part of the mission
     Enes100.println("TODO: Add mission specific tasking");
 
-    mServ.RotateTo(110); 
-
-    delay(2500); 
-
-    float avg = 0; 
-
-    for (int i = 0; i < 100; i++){
-      const int reading = mServ.GetReading();
-
-      if (avg == 0.0f){
-        avg = (float)reading;
-      } else {
-        avg += reading; 
-        avg /= 2.0f; 
-      }
-
-      Enes100.print("Voltage Reading: ");
-      Enes100.println(reading); 
-
-      delay(50); 
-    }
-
-    Serial.println("Average: ");
-    Serial.println(avg); 
-
-    delay(2500); 
-
-    mServ.ResetServo();
+    CompleteTasking(); 
 
     // Now that we have completed the task, we can follow the path to the end of the arena
     mPath = SelectPath(mArrangement);
@@ -217,7 +230,7 @@ void PMC::RunMission(const MissionType Mission){
 
     delay(100000); 
 
-    FollowPath(mPath, Forward, kThetaBound);
+    FollowPath(mPath);
 
     MarkCompleteMission();
 
@@ -229,7 +242,7 @@ void PMC::RunMission(const MissionType Mission){
     // Drive forward until we see an obstacle within 20 cm
     Drive(0.75f, Forward);
     delay(1000);
-    TurnTo(DegToRad(90.0f), Center | Turn, kThetaBound);
+    TurnTo(DegToRad(90.0f));
     // WaitUntilSee(20.0f);
     Stop();
     Enes100.println("Obstacle detected! Stopping movement.");
@@ -309,6 +322,35 @@ void PMC::RunMission(const MissionType Mission){
   {
     Enes100.println("Error: Invalid Mission Type!");
   }
+}
+
+void PMC::CompleteTasking(){
+  // Align with mission
+  if (mArrangement & Inverse){
+    // Align with the bottom side
+    TurnTo(DegToRad(-90.0f), Center | Turn, DegToRad(1.0f));
+  } else {
+    // Align with the top side
+  }
+
+  mServ.RotateTo(110); // Drops balls and prepares for reading
+
+  Enes100.println("Rotated to prepare for reading"); 
+
+  delay(2500);
+
+  mServ.Enable(); // Enable to enable jitter for some variance 
+
+  short avg = mServ.GetReading(100); 
+
+  mServ.Disable(); // Disable jitter for the rest of the run
+
+  Serial.println("Average: ");
+  Serial.println(avg); 
+
+  delay(2500); 
+
+  mServ.ResetServo(); // Reset to be able to fall cleanly
 }
 
 void PMC::MarkCompleteMission() {
@@ -467,7 +509,7 @@ int GetDirTheta(const float target_theta, const float range = 0.025f){
     return dir; 
 }
 
-void PMC::TurnTo(float direction, unsigned int axis, float theta_range){
+void PMC::TurnTo(float direction, unsigned int axis, float theta_range, unsigned int DelayAmt){
   while (direction > PI){
       direction -= PI; 
   }
@@ -483,7 +525,7 @@ void PMC::TurnTo(float direction, unsigned int axis, float theta_range){
   
   if (axis & Center){
     Enes100.println("Turning about center");
-    TurnAboutCenter(direction, theta_range);
+    TurnAboutCenter(direction, theta_range, DelayAmt);
   } else if (axis & (Turn) && !(axis & Strafe)){
     Enes100.println("Turning about strafe");
     TurnAboutCorner(direction, axis); 
@@ -492,7 +534,7 @@ void PMC::TurnTo(float direction, unsigned int axis, float theta_range){
   }
 }
 
-void PMC::TurnAboutCenter(const float Theta, const float theta_range){
+void PMC::TurnAboutCenter(const float Theta, const float theta_range, const unsigned int DelayAmt){
   int dir = GetDirTheta(Theta, theta_range);
 
   // Turn at the given rate (between 0 and 1)
@@ -502,9 +544,9 @@ void PMC::TurnAboutCenter(const float Theta, const float theta_range){
     SetMotorSpeed(FrontRight | RearRight, (float)dir * turn_speed);
     SetMotorSpeed(FrontLeft | RearLeft, -1.0f * (float)dir * turn_speed);
 
-    delay(5); 
+    delay(DelayAmt); 
     Stop();
-    delay(5); 
+    delay(DelayAmt); 
 
     dir = GetDirTheta(Theta, theta_range);
   }
@@ -643,11 +685,15 @@ float PMC::GetTheta(){
 
 Point PMC::GetPosition()
 {
+  #if USE_OFFSET
   const float iX = GetX(), iY = GetY(), theta = GetTheta(); 
   const float s = sin(theta); 
   const float c = cos(theta); 
   const float fX = iX + kOffsetX * c - kOffsetY * s; 
   const float fY = iY + kOffsetX * s + kOffsetY * s;   
+  #else 
+  const float fX = GetX(), fY = GetY(); 
+  #endif
 
   return {fX, fY};
 }

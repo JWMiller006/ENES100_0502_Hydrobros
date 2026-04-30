@@ -131,7 +131,8 @@ enum Position : unsigned short {
   L3 = 16
 };
 
-constexpr float kOffsetX = 0.00f, kOffsetY = -0.24f; 
+constexpr float kOffsetX = 0.00f, kOffsetY = 0.0f; 
+
 
 
 

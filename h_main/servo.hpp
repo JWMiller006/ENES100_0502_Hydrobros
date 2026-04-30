@@ -1,5 +1,11 @@
 #pragma once
 
+/*
+ *  Note that this current version includes a major update to prevent
+ *    the jitter by detaching when not in use (though will stay attached)
+ *    if the user wants to by calling Enable() before any other connection
+ */
+
 #include <Servo.h>
 #include <Arduino.h>
 
@@ -7,15 +13,27 @@ class ServoMotor {
 public: 
   ServoMotor(); 
   ServoMotor(unsigned int Pin); 
-  
-  Servo mServ{}; 
-  int RotPos = 0; 
 
   void RotateTo(int Degrees);
 
   void ResetServo(); 
 
-  int GetReading(); 
+  /// Gets the voltage reading, but if the parameter is 
+  ///   greater than 0, it will sample over the course of
+  ///   that number of data points over the course of 
+  ///   10 times the number of data points in milliseconds
+  short GetReading(unsigned int NumDataPoints = 0); 
+
+  void Enable();
+
+  void Disable(); 
+
+private:
+  bool bEnabled = false; 
+  int RotPos = 0; 
+  unsigned int mPin; 
+  
+  Servo mServ{}; 
 };
 
 // const int analogPin = A0;

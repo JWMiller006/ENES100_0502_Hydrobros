@@ -1,12 +1,19 @@
+
+#ifndef RUNNING
+#define RUNNING true
+#endif
+#ifndef DEBUG
+#define DEBUG true
+#endif 
+#ifndef USE_OFFSET
+#define USE_OFFSET false
+#endif 
+
 // #include <Enes100.h>
 #include "helpers.hpp"
 #include "controller.hpp"
 #include "pin_defns.hpp"
 #include "types.hpp"
-
-#ifndef RUNNING
-#define RUNNING true
-#endif
 
 void WaitUntilSee(float distance){
     // float dist = Tank.readDistanceSensor(1); 

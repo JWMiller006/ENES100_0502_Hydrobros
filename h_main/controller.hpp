@@ -3,10 +3,15 @@
 #include "us_ctl.hpp"
 #include "path.hpp"
 #include "servo.hpp"
+#include "color_sensor.hpp"
 
 #ifndef DEBUG
 #define DEBUG true
 #endif 
+
+constexpr unsigned short kPause = 3;
+constexpr float kThetaBound = 0.075f; // 0.015f 
+constexpr float kAcceptableDist = 0.25f;
 
 /// Primary Mission-Control
 class PMC {
@@ -27,6 +32,10 @@ class PMC {
     /// Runs through the final code (from start to finish)
     void RunMission(MissionType MissionType);
 
+    /// Run the main mission once we get to the right point, this includes
+    ///   Special mission alignment
+    void CompleteTasking(); 
+
     void MarkCompleteMission();
 
     /*********************************************************/
@@ -43,10 +52,10 @@ class PMC {
     void SetMotorSpeed(unsigned int Motors, float Speed); 
 
     /// Goes to a specific point on a 2D plane (in the arena)
-    void GoToPosition(const Point& p, float ThetaBound = 0.05f, float AcceptableRange = 0.1f, unsigned int US_Override = MD_None, float DistOverride = -1.0f);
+    void GoToPosition(const Point& p, float ThetaBound = kThetaBound, float AcceptableRange = kAcceptableDist, unsigned int US_Override = MD_None, float DistOverride = -1.0f);
 
     /// Turn to a specific theta (in radians) on the given axis
-    void TurnTo(float Theta, unsigned int Axis = Center | Turn, float theta_range = 0.015f);
+    void TurnTo(float Theta, unsigned int Axis = Center | Turn, float theta_range = kThetaBound, unsigned int DelayAmt = kPause);
 
     /// Set the motors to drive on the given axis (including strafing)
     void Drive(float Speed, unsigned int Axis = Forward);
@@ -86,7 +95,7 @@ class PMC {
     UltraSonicSensor ForwardUS{}, RightUS{}, LeftUS{}; 
 
     /// Helper function that turns the OTV around its center
-    void TurnAboutCenter(float Theta, float theta_range);
+    void TurnAboutCenter(float Theta, float theta_range, unsigned int DelayAmt = kPause);
 
     /// Helper function that turns the OTV about some other axis (or together different directions to make an axis)
     void TurnAboutCorner(float Theta, unsigned int Axis); 
