@@ -145,7 +145,7 @@ void PMC::RunMission(const MissionType Mission){
       Enes100.println("Starting on the top of the arena (by y coordinate)");
       #endif 
 
-      target_position = gPoints[PA];
+      // target_position = gPoints[PA];
       mArrangement |= Inverse;
       TurnTo(DegToRad(-90.0f));
 
@@ -172,7 +172,7 @@ void PMC::RunMission(const MissionType Mission){
         mArrangement |= E;
       }
 
-      GoToPosition(gPoints[PB]); 
+      GoToPosition(gPoints[PC]); 
 
       Stop(); 
 
@@ -227,7 +227,7 @@ void PMC::RunMission(const MissionType Mission){
         mArrangement |= E;
       }
 
-      GoToPosition(gPoints[PA], 0.5f, 0.5f); 
+      GoToPosition(gPoints[PD], 0.5f, 0.5f); 
 
       Stop(); 
 
@@ -260,6 +260,8 @@ void PMC::RunMission(const MissionType Mission){
     delay(2500); 
 
     FollowPath(mPath);
+
+    Drive(1.0f); 
 
     MarkCompleteMission();
 
@@ -387,8 +389,6 @@ void PMC::CompleteTasking(){
 
   Enes100.println("Rotated to prepare for reading"); 
 
-  delay(2500);
-
   mServ.Enable(); // Enable to enable jitter for some variance 
 
   Enes100.println("Getting reading"); 
@@ -406,7 +406,10 @@ void PMC::CompleteTasking(){
 
   delay(2500); 
 
+  mServ.RotateTo(0); 
   mServ.ResetServo(); // Reset to be able to fall cleanly
+
+  mServ.Disable();
 
   delay(1500); 
 

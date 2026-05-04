@@ -46,6 +46,10 @@ void setup()
     attachInterrupt(digitalPinToInterrupt(BUTTON_RESET_WHITE_POINT), PMC::CalibrateWhitePoint, CHANGE); // TODO: Wire up buttons to this and a ground
     attachInterrupt(digitalPinToInterrupt(BUTTON_RESET_BLACK_POINT), PMC::CalibrateBlackPoint, CHANGE); // TODO: Wire up buttons to this and a ground
 
+    // controller.mServ.RotateTo(0); 
+
+    // delay(4000); 
+
     controller.RunMission(FullMission);
 
     // controller.RunMission(Debug);

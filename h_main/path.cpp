@@ -33,7 +33,7 @@ Path SelectPath(unsigned int& Arrangement) {
             path.points[1] = gPoints[L3];
             path.points[2] = gPoints[L1];
             path.points[3] = gPoints[PL];
-            path.points[4] = gPoints[PF];
+            // path.points[4] = gPoints[PF];
             path.num_points = 5;
             Arrangement |= F;
         } else if (Arrangement & A) {
@@ -41,7 +41,7 @@ Path SelectPath(unsigned int& Arrangement) {
             path.points[1] = gPoints[L2];
             path.points[2] = gPoints[L1];
             path.points[3] = gPoints[PL];
-            path.points[4] = gPoints[PF];
+            // path.points[4] = gPoints[PF];
             path.num_points = 5;
             // We don't know where the
             //      bottom one is, but we
@@ -55,7 +55,7 @@ Path SelectPath(unsigned int& Arrangement) {
             path.points[2] = gPoints[L2];
             path.points[3] = gPoints[PG];
             path.points[4] = gPoints[PL];
-            path.points[5] = gPoints[PF];
+            // path.points[5] = gPoints[PF];
             path.num_points = 6;
             // We don't know where the
             //      bottom one is, but we
@@ -70,7 +70,7 @@ Path SelectPath(unsigned int& Arrangement) {
             path.points[3] = gPoints[PO6];
             path.points[4] = gPoints[PG];
             path.points[5] = gPoints[PL];
-            path.points[6] = gPoints[PF];
+            // path.points[6] = gPoints[PF];
             path.num_points = 7;
             // We can assume that the bottom
             //      one is closer since we
@@ -85,7 +85,7 @@ Path SelectPath(unsigned int& Arrangement) {
             path.points[2] = gPoints[L2];
             path.points[3] = gPoints[PG];
             path.points[4] = gPoints[PL];
-            path.points[5] = gPoints[PF];
+            // path.points[5] = gPoints[PF];
             path.num_points = 6;
             // We know that the final
             //      obstacle is farther since
@@ -100,7 +100,7 @@ Path SelectPath(unsigned int& Arrangement) {
             path.points[4] = gPoints[PO6];
             path.points[5] = gPoints[PG];
             path.points[6] = gPoints[PL];
-            path.points[7] = gPoints[PF];
+            // path.points[7] = gPoints[PF];
             path.num_points = 8;
             // We don't know where the top
             //      obstacle is, but we don't
@@ -113,7 +113,7 @@ Path SelectPath(unsigned int& Arrangement) {
             path.points[2] = gPoints[L2];
             path.points[3] = gPoints[PG];
             path.points[4] = gPoints[PL];
-            path.points[5] = gPoints[PF];
+            // path.points[5] = gPoints[PF];
             path.num_points = 6;
             // We don't know where the top
             //      obstacle is, but we don't
@@ -125,7 +125,7 @@ Path SelectPath(unsigned int& Arrangement) {
             path.points[1] = gPoints[L2];
             path.points[2] = gPoints[L1];
             path.points[3] = gPoints[PL];
-            path.points[4] = gPoints[PF];
+            // path.points[4] = gPoints[PF];
             path.num_points = 5;
             // We know the top one is closer since
             //      we know the other two are farther
