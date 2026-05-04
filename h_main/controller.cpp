@@ -45,6 +45,7 @@ void PMC::Init(const char* Name, const int MissionType, const int MarkerID, cons
 
   // Setup servo motor
   mServ = ServoMotor(SERVO_PIN); 
+  // mServ.Enable();
 
   // Setup Color Sensor 
   mColor = ColorSensor(CS_S0, CS_S1, CS_S2, CS_S3, CS_OUT); 
@@ -149,14 +150,14 @@ void PMC::RunMission(const MissionType Mission){
       TurnTo(DegToRad(-90.0f));
 
       // Get initial reading
-      if (const float obstacle_one = GetUSReading(Left); obstacle_one < 1.5f) {
+      if (const float obstacle_one = GetUSReading(Left); obstacle_one < 1.0f) {
         mArrangement |= A;
       } else {
         mArrangement |= D;
       } 
 
       // Go to the next position to get a reading
-      GoToPosition(gPoints[PE]);
+      GoToPosition(gPoints[PE], kThetaBound, 0.125f);
       TurnTo(DegToRad(-90.0f)); 
 
       // Get US Reading on left side
@@ -165,14 +166,18 @@ void PMC::RunMission(const MissionType Mission){
       Enes100.print("Obstacle 2 reading: ");
       Enes100.println(obstacle_two); 
 
-      if (obstacle_two < 1.5f) {
+      if (obstacle_two < 1.0f) {
         mArrangement |= B;
       } else {
         mArrangement |= E;
       }
 
+      GoToPosition(gPoints[PB]); 
+
+      Stop(); 
+
       GoToPosition(gPoints[PD]);
-      TurnTo(DegToRad(-90.0f)); 
+      // TurnTo(DegToRad(-90.0f)); 
       Stop(); 
 
       Enes100.println("Arrived and ready for mission");
@@ -183,7 +188,7 @@ void PMC::RunMission(const MissionType Mission){
       Enes100.println("Starting on the bottom of the arena (by y coordinate)");
       #endif 
 
-      target_position = gPoints[PB];
+      // target_position = gPoints[PEU];
       TurnTo(DegToRad(90.0f));
 
       const float obstacle_one = GetUSReading(Right);
@@ -191,18 +196,21 @@ void PMC::RunMission(const MissionType Mission){
       Enes100.println(" cm to obstacle one"); 
 
       // Get initial reading
-      if (obstacle_one < 1.5f) {
+      if (obstacle_one < 1.0f) {
         mArrangement |= C;
       } else {
         mArrangement |= F;
       }
 
+      delay(1500); 
+      Enes100.println("Going to position E from the bottom"); 
+
       // Go to the next position to get a reading
-      GoToPosition(gPoints[PE]);
+      GoToPosition(gPoints[PEU], kThetaBound, 0.05f);
 
       Enes100.println("Arrived at point E; Aligning for US reading"); 
 
-      TurnTo(DegToRad(90.0f), DegToRad(3.0f)); 
+      // TurnTo(DegToRad(90.0f), DegToRad(3.0f)); 
 
       Stop(); 
 
@@ -213,13 +221,17 @@ void PMC::RunMission(const MissionType Mission){
       Enes100.println(" cm to obstacle two"); 
 
       // Get US Reading on right side
-      if (obstacle_two < 1.5f && obstacle_two > 0.0f) {
+      if (obstacle_two < 1.0f && obstacle_two > 0.0f) {
         mArrangement |= B;
       } else {
         mArrangement |= E;
       }
 
-      GoToPosition(gPoints[PC]); 
+      GoToPosition(gPoints[PA], 0.5f, 0.5f); 
+
+      Stop(); 
+
+      GoToPosition(gPoints[PC], kThetaBound, 0.075f); 
 
       Stop(); 
 
@@ -245,7 +257,7 @@ void PMC::RunMission(const MissionType Mission){
       Enes100.println(mPath.points[i].y);
     }
 
-    delay(100000); 
+    delay(2500); 
 
     FollowPath(mPath);
 
@@ -299,6 +311,12 @@ void PMC::RunMission(const MissionType Mission){
 
     mServ.RotateTo(110); 
 
+    delay(1500); 
+
+    Enes100.print("Voltage Reading: ");
+    Enes100.print(mServ.GetReading(100)); 
+    Enes100.println(" V"); 
+
     // delay(2500); 
 
     // float avg = 0; 
@@ -335,6 +353,13 @@ void PMC::RunMission(const MissionType Mission){
     GoToPosition(gPoints[PG]); 
     Stop(); 
 
+  } else if (Mission == TestPathFinding){
+    mArrangement = 0; 
+    mArrangement |= (A | C | E); 
+    mPath = SelectPath(mArrangement); 
+    Enes100.println("Path selected"); 
+    delay(1500); 
+    FollowPath(mPath, Forward, 16.0f); 
   } else
   {
     Enes100.println("Error: Invalid Mission Type!");
@@ -343,18 +368,18 @@ void PMC::RunMission(const MissionType Mission){
 
 void PMC::CompleteTasking(){
   // Align with mission
-  Enes100.println("Aligning with mission"); 
-  if (mArrangement & Inverse){
-    // Align with the bottom side
-    TurnTo(DegToRad(-90.0f), Center | Turn, DegToRad(1.0f), 1);
-    GoToPosition(gPoints[PD], DegToRad(1.0f), 0.01f, MD_None, -1.0f); 
-    TurnTo(DegToRad(-90.0f), Center | Turn, DegToRad(1.0f), 1);
-  } else {
-    // Align with the top side
-    TurnTo(DegToRad(90.0f), Center | Turn, DegToRad(1.0f), 1);
-    GoToPosition(gPoints[PC], DegToRad(1.0f), 0.01f, MD_None, -1.0f);
-    TurnTo(DegToRad(90.0f), Center | Turn, DegToRad(1.0f), 1);
-  }
+  // Enes100.println("Aligning with mission"); 
+  // if (mArrangement & Inverse){
+  //   // Align with the bottom side
+  //   TurnTo(DegToRad(-90.0f), Center | Turn, DegToRad(1.0f), 1);
+  //   GoToPosition(gPoints[PD], DegToRad(1.0f), 0.01f, MD_None, -1.0f); 
+  //   TurnTo(DegToRad(-90.0f), Center | Turn, DegToRad(1.0f), 1);
+  // } else {
+  //   // Align with the top side
+  //   TurnTo(DegToRad(90.0f), Center | Turn, DegToRad(1.0f), 1);
+  //   GoToPosition(gPoints[PC], DegToRad(1.0f), 0.01f, MD_None, -1.0f);
+  //   TurnTo(DegToRad(90.0f), Center | Turn, DegToRad(1.0f), 1);
+  // }
 
   Enes100.println("Aligned with mission, prepping drop"); 
 
@@ -366,9 +391,15 @@ void PMC::CompleteTasking(){
 
   mServ.Enable(); // Enable to enable jitter for some variance 
 
+  Enes100.println("Getting reading"); 
+
   short avg = mServ.GetReading(100); 
 
   mServ.Disable(); // Disable jitter for the rest of the run
+
+  Enes100.print("Read Voltage: ");
+  Enes100.print(avg); 
+  Enes100.println(" V"); 
 
   Serial.println("Average: ");
   Serial.println(avg); 
@@ -388,7 +419,7 @@ void PMC::CompleteTasking(){
   // Now to read the colors, solution: Strafe backand forward to find the most prevalent color
 
   Drive(GLOBAL_DRIVE_SPEED, Left | Strafe); 
-  delay(20); 
+  delay(200); 
   Stop(); 
 
   Color cList[50];
@@ -409,7 +440,7 @@ void PMC::CompleteTasking(){
       Dir = Right; 
     }
 
-    delay(250); 
+    delay(750); 
   }
 
   Enes100.print("Current Color: "); 
@@ -586,16 +617,16 @@ void PMC::TurnTo(float direction, unsigned int axis, float theta_range, unsigned
       direction += PI; 
   }
 
-  Enes100.println("Direction: "); 
-  Enes100.println(direction); 
-  Enes100.println("Axis: "); 
-  Enes100.println((float)axis);
+  // Enes100.println("Direction: "); 
+  // Enes100.println(direction); 
+  // Enes100.println("Axis: "); 
+  // Enes100.println((float)axis);
   
   if (axis & Center){
-    Enes100.println("Turning about center");
+    // Enes100.println("Turning about center");
     TurnAboutCenter(direction, theta_range, DelayAmt);
   } else if (axis & (Turn) && !(axis & Strafe)){
-    Enes100.println("Turning about strafe");
+    // Enes100.println("Turning about strafe");
     TurnAboutCorner(direction, axis); 
   } else if (axis & Strafe && !(axis & Turn)){
     Enes100.println("Error: Trying to strafe in the turn function");
@@ -729,7 +760,15 @@ void PMC::WaitUntilSee(float Distance, unsigned int Direction)
 void PMC::FollowPath(Path &path, unsigned int US_Override, float DistOverride) {
   while (!path.empty()) {
     const Point next_point = path.GetNextPoint();
-    GoToPosition(next_point, kThetaBound, kAcceptableDist, US_Override, DistOverride);
+    Enes100.print("Going to point ("); 
+    Enes100.print(next_point.x); 
+    Enes100.print(", ");
+    Enes100.print(next_point.y); 
+    Enes100.println(")"); 
+    Enes100.print("US Reading: ");
+    Enes100.println(this->ForwardUS.GetDistance()); 
+    delay(10); 
+    GoToPosition(next_point, 0.25f, 0.25f, US_Override, DistOverride);
   }
 }
 

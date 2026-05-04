@@ -37,7 +37,7 @@ Path SelectPath(unsigned int& Arrangement) {
             path.num_points = 5;
             Arrangement |= F;
         } else if (Arrangement & A) {
-            path.points[0] = gPoints[PE];
+            path.points[0] = gPoints[PEU];
             path.points[1] = gPoints[L2];
             path.points[2] = gPoints[L1];
             path.points[3] = gPoints[PL];
@@ -64,7 +64,7 @@ Path SelectPath(unsigned int& Arrangement) {
             //      have a path through it
             Arrangement |= D | C | F;
         } else {
-            path.points[0] = gPoints[PE];
+            path.points[0] = gPoints[PEU];
             path.points[1] = gPoints[L2];
             path.points[2] = gPoints[L3];
             path.points[3] = gPoints[PO6];
@@ -93,7 +93,7 @@ Path SelectPath(unsigned int& Arrangement) {
             //      closer
             Arrangement |= D;
         } else if (Arrangement & C) {
-            path.points[0] = gPoints[PE];
+            path.points[0] = gPoints[PEU];
             path.points[1] = gPoints[PO2];
             path.points[2] = gPoints[L2];
             path.points[3] = gPoints[L3];
@@ -121,7 +121,7 @@ Path SelectPath(unsigned int& Arrangement) {
             //      have a path
             Arrangement |= A | D | F;
         } else {
-            path.points[0] = gPoints[PE];
+            path.points[0] = gPoints[PEU];
             path.points[1] = gPoints[L2];
             path.points[2] = gPoints[L1];
             path.points[3] = gPoints[PL];

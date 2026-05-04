@@ -61,6 +61,7 @@ enum MissionType : unsigned int {
   CalibrateMotors = 5, 
   CalibrateUS = 6,
   CalibrateServo = 7, 
+  TestPathFinding = 8,
 };
 
 /// 2D point on the arena
@@ -93,22 +94,23 @@ struct Point {
 
 static Point gPoints[] = {
   {0.22f, 0.45f},     // A
-  {0.22f, 1.59f},     // B
-  {0.20f, 1.28f},     // C 1.046
-  {0.22f, 0.75f},     // D
-  {0.22f, 1.00f},     // E
+  {0.32f, 1.75f},     // B
+  {0.223f, 1.05f},     // C 1.046
+  {0.316f, 0.966f},     // D
+  {0.22f, 1.23f},     // E (Down)
   {3.95f, 1.57f},     // F
   {3.13f, 1.00f},     // G
-  {3.43f, 1.60f},     // L
-  {1.21f, 1.59f},     // O1
-  {1.25f, 1.00f},     // O2
-  {1.25f, 0.43f},     // O3
-  {2.17f, 1.60f},     // O4
-  {2.21f, 0.95f},     // O5
-  {2.20f, 0.40f},     // O6
-  {1.70f, 1.60f},     // L1
-  {1.70f, 1.00f},     // L2
-  {1.70f, 0.40f},     // L3
+  {3.00f, 1.60f},     // L
+  {0.991f, 1.54f},     // O1
+  {1.25f, 1.02f},     // O2
+  {1.036f, 0.426f},     // O3
+  {1.929f, 1.582f},     // O4
+  {1.936f, 1.00f},     // O5
+  {1.95f, 0.426f},     // O6
+  {1.468f, 1.524f},     // L1
+  {1.542f, 1.00f},     // L2
+  {1.546f, 0.513f},     // L3
+  {0.22f, 0.776f},    // E (Up)
 };
 
 enum Position : unsigned short {
@@ -128,7 +130,8 @@ enum Position : unsigned short {
   PO6 = 13,
   L1 = 14,
   L2 = 15,
-  L3 = 16
+  L3 = 16,
+  PEU = 17,
 };
 
 constexpr float kOffsetX = 0.00f, kOffsetY = 0.0f; 
